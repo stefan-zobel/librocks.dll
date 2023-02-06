@@ -80,8 +80,7 @@ private:
 
 private:
     bool open;
-    // TODO: is a recursive mutex really necessary?
-    mutable std::recursive_mutex monitor;
+    mutable std::mutex monitor;
     rocksdb::DBOptions options;
     rocksdb::TransactionDBOptions txnDbOptions;
     rocksdb::TransactionOptions txnOpts;

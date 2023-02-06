@@ -1,0 +1,4 @@
+#define LIBROCKS_API __declspec(dllexport)
+#define LIBROCKS_API __declspec(dllimport)
+#define synchronize(mut) \
+    std::lock_guard<std::mutex> guard((mut))

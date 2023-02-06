@@ -6,8 +6,11 @@
 #include <mutex>
 
 
+//#define synchronize(mut) \
+//    std::lock_guard<std::recursive_mutex> guard((mut))
+
 #define synchronize(mut) \
-    std::lock_guard<std::recursive_mutex> guard((mut))
+    std::lock_guard<std::mutex> guard((mut))
 
 
 inline void assign(int code, int* status) {
