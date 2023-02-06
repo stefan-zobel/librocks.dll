@@ -74,9 +74,8 @@ rocksdb::Status StoreImpl::openDatabase() {
             families.push_back(rocksdb::kDefaultColumnFamilyName);
         }
         std::vector<rocksdb::ColumnFamilyDescriptor> cfDescs;
-        for (size_t i = 0; i < families.size(); ++i) {
-            std::string cfName = families[i];
-            cfDescs.push_back(rocksdb::ColumnFamilyDescriptor(cfName, columnFamilyOptions));
+        for (auto cfName : families) {
+            cfDescs.emplace_back(cfName, columnFamilyOptions);
         }
         std::vector<rocksdb::ColumnFamilyHandle*> cfHandles;
         s = rocksdb::TransactionDB::Open(options, txnDbOptions, path, cfDescs, &cfHandles, &txnDb);
@@ -456,10 +455,8 @@ void StoreImpl::syncAndReset() noexcept {
 
 void StoreImpl::occasionalWalSync() noexcept {
     ++totalSinceLastSync;
-    if (since(lastSync) >= FLUSH_TIME_WINDOW_MILLIS) {
-        syncAndReset();
-    }
-    else if (totalSinceLastSync % FLUSH_BATCH_SIZE == 0L) {
+    if ((since(lastSync) >= FLUSH_TIME_WINDOW_MILLIS)
+        || (totalSinceLastSync % FLUSH_BATCH_SIZE == 0L)) {
         syncAndReset();
     }
 }

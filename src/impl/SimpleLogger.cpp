@@ -55,9 +55,9 @@ Logger& Logger::get(LogLevel level) {
 
         const std::string& datetime = datetimeNow();
         const std::string& threadId = getCurrentThreadId();
-        str.append(datetime.c_str()).append(" ");
+        str.append(datetime).append(" ");
         str.append(levelToString(level));
-        str.append(" [").append(threadId.c_str());
+        str.append(" [").append(threadId);
         str.append("]\t- ");
     } else {
         loggerLogLevel = static_cast<LogLevel>(static_cast<int>(Logger::maxLogLevel) + 1);
@@ -89,7 +89,7 @@ inline const char* levelToString(LogLevel level) noexcept {
 static const std::string dateToday()
 {
     char buffer[MAX_LEN];
-    if (GetDateFormatA(LOCALE_USER_DEFAULT, 0, 0, "yyyy'-'MM'-'dd", &buffer[0], MAX_LEN) == 0) {
+    if (GetDateFormatA(LOCALE_USER_DEFAULT, 0, nullptr, "yyyy'-'MM'-'dd", &buffer[0], MAX_LEN) == 0) {
         return std::string("Error in dateToday()");
     }
     return std::string(&buffer[0]);
@@ -103,7 +103,7 @@ static const std::string timeNow()
     static DWORD firstTick = GetTickCount();
 
     char buffer[MAX_LEN];
-    if (GetTimeFormatA(LOCALE_USER_DEFAULT, 0, 0, "HH':'mm':'ss", &buffer[0], MAX_LEN) == 0) {
+    if (GetTimeFormatA(LOCALE_USER_DEFAULT, 0, nullptr, "HH':'mm':'ss", &buffer[0], MAX_LEN) == 0) {
         return std::string(errTxt);
     }
 
@@ -129,7 +129,7 @@ const std::string datetimeNow()
     const std::string& now = timeNow();
 
     std::string datetime(today);
-    datetime.append(" ").append(now.c_str());
+    datetime.append(" ").append(now);
 
     return datetime;
 }

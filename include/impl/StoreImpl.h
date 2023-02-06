@@ -12,9 +12,9 @@
 
 class StoreImpl : public Store, public KindManager {
 public:
-    StoreImpl(const char* path);
+    explicit StoreImpl(const char* path);
 
-    void close() override;
+    void close() override final;
 
     bool isOpen() const noexcept override;
 
