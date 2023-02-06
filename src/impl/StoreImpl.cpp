@@ -90,7 +90,6 @@ rocksdb::Status StoreImpl::openDatabase() {
 }
 
 void StoreImpl::close() {
-    // XXX TODO ... what else needs to be discarded? ...
     synchronize(monitor);
     if (open) {
         open = false;
@@ -465,12 +464,76 @@ void StoreImpl::occasionalWalSync() noexcept {
     }
 }
 
-char* StoreImpl::findMinKey(int* status, const Kind& kind) const noexcept {
-    // TODO !!!
+char* StoreImpl::findMinKey(int* status, const Kind& k, size_t* resultLen) const noexcept {
+    if (!k.isValid()) {
+        assign(InvalidArgument, status);
+        return;
+    }
+    KindImpl* kind = toKindImpl(k, status);
+    if (!kind) {
+        return;
+    }
+    *resultLen = 0;
+    synchronize(monitor);
+    if (validateOpen(status)) {
+        rocksdb::Iterator* it = txnDb->NewIterator(readOptions, kind->handle());
+        if (it) {
+            it->SeekToFirst();
+            char* minKey = nullptr;
+            if (it->Valid()) {
+                rocksdb::Slice key = it->key();
+                if (!key.empty()) {
+                    *resultLen = key.size();
+                    minKey = new char[*resultLen];
+                    memcpy(minKey, key.data(), *resultLen);
+                }
+            }
+            delete it;
+            return minKey;
+        }
+        else {
+            assign(NoIterator, status);
+        }
+    }
+    else {
+        assign(Closed, status);
+    }
     return nullptr;
 }
 
-char* StoreImpl::findMaxKey(int* status, const Kind& kind) const noexcept {
-    // TODO !!!
+char* StoreImpl::findMaxKey(int* status, const Kind& k, size_t* resultLen) const noexcept {
+    if (!k.isValid()) {
+        assign(InvalidArgument, status);
+        return;
+    }
+    KindImpl* kind = toKindImpl(k, status);
+    if (!kind) {
+        return;
+    }
+    *resultLen = 0;
+    synchronize(monitor);
+    if (validateOpen(status)) {
+        rocksdb::Iterator* it = txnDb->NewIterator(readOptions, kind->handle());
+        if (it) {
+            it->SeekToLast();
+            char* maxKey = nullptr;
+            if (it->Valid()) {
+                rocksdb::Slice key = it->key();
+                if (!key.empty()) {
+                    *resultLen = key.size();
+                    maxKey = new char[*resultLen];
+                    memcpy(maxKey, key.data(), *resultLen);
+                }
+            }
+            delete it;
+            return maxKey;
+        }
+        else {
+            assign(NoIterator, status);
+        }
+    }
+    else {
+        assign(Closed, status);
+    }
     return nullptr;
 }

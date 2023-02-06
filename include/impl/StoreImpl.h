@@ -48,9 +48,9 @@ public:
     void putIfAbsent(int* status, const Kind& kind, const char* key, size_t keyLen, const char* value,
         size_t valLen) noexcept override;
 
-    char* findMinKey(int* status, const Kind& kind) const noexcept override;
+    char* findMinKey(int* status, const Kind& kind, size_t* resultLen) const noexcept override;
 
-    char* findMaxKey(int* status, const Kind& kind) const noexcept override;
+    char* findMaxKey(int* status, const Kind& kind, size_t* resultLen) const noexcept override;
 
     void syncWAL() noexcept override;
 

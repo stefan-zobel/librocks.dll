@@ -21,9 +21,9 @@ struct LIBROCKS_API ExtendedOps : public BasicOps {
 
     virtual void flushNoWait() noexcept = 0;
 
-    virtual char* findMinKey(int* status, const Kind& kind) const noexcept = 0;
+    virtual char* findMinKey(int* status, const Kind& kind, size_t* resultLen) const noexcept = 0;
 
-    virtual char* findMaxKey(int* status, const Kind& kind) const noexcept = 0;
+    virtual char* findMaxKey(int* status, const Kind& kind, size_t* resultLen) const noexcept = 0;
 
     virtual ~ExtendedOps() = default;
 };
