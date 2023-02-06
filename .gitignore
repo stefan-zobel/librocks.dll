@@ -1,0 +1,6 @@
+.vs/
+/lib/
+/pdb/
+/rocksdb_database/
+/Test/
+/x64/
