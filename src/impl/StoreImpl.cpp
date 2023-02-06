@@ -467,11 +467,11 @@ void StoreImpl::occasionalWalSync() noexcept {
 char* StoreImpl::findMinKey(int* status, const Kind& k, size_t* resultLen) const noexcept {
     if (!k.isValid()) {
         assign(InvalidArgument, status);
-        return;
+        return nullptr;
     }
     KindImpl* kind = toKindImpl(k, status);
     if (!kind) {
-        return;
+        return nullptr;
     }
     *resultLen = 0;
     synchronize(monitor);
@@ -504,11 +504,11 @@ char* StoreImpl::findMinKey(int* status, const Kind& k, size_t* resultLen) const
 char* StoreImpl::findMaxKey(int* status, const Kind& k, size_t* resultLen) const noexcept {
     if (!k.isValid()) {
         assign(InvalidArgument, status);
-        return;
+        return nullptr;
     }
     KindImpl* kind = toKindImpl(k, status);
     if (!kind) {
-        return;
+        return nullptr;
     }
     *resultLen = 0;
     synchronize(monitor);
