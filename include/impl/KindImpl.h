@@ -24,7 +24,7 @@ public:
 
     bool operator==(const RocksType& other) const noexcept override;
 
-    const char* toString() const noexcept;
+    const char* toString() const noexcept override;
 
     rocksdb::ColumnFamilyHandle* handle() const noexcept;
 
