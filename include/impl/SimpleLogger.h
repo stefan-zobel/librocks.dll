@@ -55,7 +55,7 @@ public: // static methods
 
 private:
     Logger(const Logger&); // copy constructor
-    Logger& operator= (const Logger&); // assignment operator
+    Logger& operator= (const Logger&) = delete; // assignment operator
 
 private: // static methods
     static FILE*& stream() noexcept;
