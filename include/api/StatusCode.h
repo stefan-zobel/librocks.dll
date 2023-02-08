@@ -20,3 +20,4 @@ constexpr int Expired = 12;
 constexpr int TryAgain = 13;
 constexpr int CompactionTooLarge = 14;
 constexpr int ColumnFamilyDropped = 15;
+constexpr int Unknown = 16;
