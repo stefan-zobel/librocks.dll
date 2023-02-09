@@ -6,6 +6,30 @@
 KVStore::KVStore(Store* pStore) : store(pStore) {
 }
 
+KVStore::~KVStore() {
+    if (store) {
+        delete store;
+    }
+    store = nullptr;
+}
+
+void KVStore::close() {
+    store->close();
+}
+
+bool KVStore::isOpen() const noexcept {
+    return store->isOpen();
+}
+
+KindManager& KVStore::getKindManager() const {
+    int status = Ok;
+    KindManager& mgr = store->getKindManager(&status);
+    if (status != Ok) {
+        throwForStatus(status);
+    }
+    return mgr;
+}
+
 void KVStore::put(const Kind& kind, std::string& key, std::string& value) {
     int status = Ok;
     store->put(&status, kind, key.data(), key.size(), value.data(), value.size());

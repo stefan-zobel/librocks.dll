@@ -11,6 +11,8 @@ public:
 
     explicit KVStore(Store* store);
 
+    ~KVStore();
+
     void put(const Kind& kind, std::string& key, std::string& value);
 
     void remove(const Kind& kind, std::string& key);
@@ -30,6 +32,12 @@ public:
     bytes findMinKey(const Kind& kind) const;
 
     bytes findMaxKey(const Kind& kind) const;
+
+    void close();
+
+    bool isOpen() const noexcept;
+
+    KindManager& getKindManager() const;
 
 private:
     Store* store;
