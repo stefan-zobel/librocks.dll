@@ -1,11 +1,6 @@
 .vs/
-librocks.sln
-librocks.vcxproj
-librocks.vcxproj.filters
-librocks.vcxproj.user
 /backup/
 /lib/
 /pdb/
-/rocksdb_database/
-/Test/
+/Test/x64/
 /x64/
