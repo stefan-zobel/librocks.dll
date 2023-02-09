@@ -6,11 +6,11 @@ bytes::bytes(bytes const& other) : size_(0), data_(nullptr) {
     if (other.size_ > 0) {
         copy(other);
     }
-    printf("copy constructor called\n");
+    printf("bytes copy constructor called\n");
 }
 
 bytes& bytes::operator=(bytes const& other) {
-    printf("copy assignment operator called\n");
+    printf("bytes copy assignment operator called\n");
     if (this != &other) {
         clear();
         if (other.size_ > 0) {
@@ -27,18 +27,18 @@ bytes& bytes::operator=(std::nullptr_t) {
 
 bytes::bytes(bytes&& moving) noexcept : size_(0), data_(nullptr) {
     moving.swap(*this);
-    printf("move constructor called\n");
+    printf("bytes move constructor called\n");
 }
 
 bytes& bytes::operator=(bytes&& moving) noexcept {
     moving.swap(*this);
-    printf("move assignment operator called\n");
+    printf("bytes move assignment operator called\n");
     return *this;
 }
 
 bytes::~bytes() {
+    printf("bytes destructor called. Content is %s\n", data_);
     clear();
-    printf("destructor called\n");
 }
 
 void bytes::clear() {

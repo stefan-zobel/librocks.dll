@@ -14,7 +14,9 @@ KVStore::~KVStore() {
 }
 
 void KVStore::close() {
-    store->close();
+    if (store) {
+        store->close();
+    }
 }
 
 bool KVStore::isOpen() const noexcept {
