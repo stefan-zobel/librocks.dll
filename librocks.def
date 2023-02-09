@@ -1,9 +1,0 @@
-LIBRARY "librocks.dll"
-EXPORTS
-??0RocksType@@QEAA@AEBU0@@Z
-??0RocksType@@QEAA@XZ
-??1RocksType@@UEAA@XZ
-??4RocksType@@QEAAAEAU0@AEBU0@@Z
-??_7RocksType@@6B@ DATA
-getRocksType
-hello
