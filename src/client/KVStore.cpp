@@ -80,7 +80,7 @@ bytes KVStore::singleRemoveIfPresent(const Kind& kind, std::string& key) {
     int status = Ok;
     size_t resultLen = 0;
     char* removed = store->singleRemoveIfPresent(&status, kind, &resultLen, key.data(), key.size());
-    if (status != Ok) {
+    if (!(status == Ok || status == NotFound)) {
         throwForStatus(status);
     }
     return bytes(removed, resultLen);
@@ -90,7 +90,7 @@ bytes KVStore::removeIfPresent(const Kind& kind, std::string& key) {
     int status = Ok;
     size_t resultLen = 0;
     char* removed = store->removeIfPresent(&status, kind, &resultLen, key.data(), key.size());
-    if (status != Ok) {
+    if (!(status == Ok || status == NotFound)) {
         throwForStatus(status);
     }
     return bytes(removed, resultLen);
