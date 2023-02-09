@@ -9,8 +9,8 @@ KVStore::KVStore(Store* pStore) : store(pStore) {
 KVStore::~KVStore() {
     if (store) {
         delete store;
+        store = nullptr;
     }
-    store = nullptr;
 }
 
 void KVStore::close() {
