@@ -23,6 +23,24 @@ bool KVStore::isOpen() const noexcept {
     return store->isOpen();
 }
 
+const Kind& KVStore::getDefaultKind() const {
+    int status = Ok;
+    const Kind& k = getKindManager().getDefaultKind(&status);
+    if (status != Ok) {
+        throwForStatus(status);
+    }
+    return k;
+}
+
+const Kind& KVStore::getOrCreateKind(std::string& kindName) {
+    int status = Ok;
+    const Kind& k = getKindManager().getOrCreateKind(&status, kindName.c_str());
+    if (status != Ok) {
+        throwForStatus(status);
+    }
+    return k;
+}
+
 KindManager& KVStore::getKindManager() const {
     int status = Ok;
     KindManager& mgr = store->getKindManager(&status);

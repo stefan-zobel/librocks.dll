@@ -37,7 +37,9 @@ public:
 
     bool isOpen() const noexcept;
 
-    KindManager& getKindManager() const;
+    const Kind& getDefaultKind() const;
+
+    const Kind& getOrCreateKind(std::string& kindName);
 
 private:
     Store* store;
@@ -45,4 +47,5 @@ private:
 private:
     static const std::map<int, std::string> codes;
     static bool throwForStatus(int status);
+    KindManager& getKindManager() const;
 };
