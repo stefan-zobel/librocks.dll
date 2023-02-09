@@ -59,7 +59,7 @@ void bytes::swap(bytes& src) noexcept {
 void bytes::copy(bytes const& other) {
     size_ = other.size_;
     char* tmp = new char[other.size_];
-    std::memcpy(tmp, other.data_, sizeof(char8_t) * other.size_);
+    std::memcpy(tmp, other.data_, other.size_);
     data_ = tmp;
 }
 
