@@ -31,8 +31,10 @@ int main() {
         kv.remove(newKind, newKey2a);
 
         kv.singleRemove(newKind, newKey2b);
-        kv.singleRemoveIfPresent(newKind, newKey2c);
-        kv.removeIfPresent(newKind, newKey2d);
+        bytes removed1 = kv.singleRemoveIfPresent(newKind, newKey2c);
+        std::cout << "removed1 is empty : " << removed1.isEmpty() << "\n";
+        bytes removed2 = kv.removeIfPresent(newKind, newKey2d);
+        std::cout << "removed2 is empty : " << removed2.isEmpty() << "\n";
 
         std::string newKey3 = "newKey_3";
         bytes result = kv.get(newKind, newKey3);
