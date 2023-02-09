@@ -37,7 +37,6 @@ bytes& bytes::operator=(bytes&& moving) noexcept {
 }
 
 bytes::~bytes() {
-    printf("bytes destructor called. Content is %s\n", data_);
     clear();
 }
 
