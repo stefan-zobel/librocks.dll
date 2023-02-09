@@ -50,7 +50,7 @@ bytes KVStore::get(const Kind& kind, std::string& key) const {
     int status = Ok;
     size_t resultLen = 0;
     char* val = store->get(&status, kind, &resultLen, key.data(), key.size());
-    if (status != Ok) {
+    if (!(status == Ok || status == NotFound)) {
         throwForStatus(status);
     }
     return bytes(val, resultLen);
@@ -60,7 +60,7 @@ bytes KVStore::updateIfPresent(const Kind& kind, std::string& key, std::string& 
     int status = Ok;
     size_t resultLen = 0;
     char* oldVal = store->updateIfPresent(&status, kind, &resultLen, key.data(), key.size(), value.data(), value.size());
-    if (status != Ok) {
+    if (!(status == Ok || status == NotFound)) {
         throwForStatus(status);
     }
     return bytes(oldVal, resultLen);
@@ -129,7 +129,7 @@ bytes KVStore::findMaxKey(const Kind& kind) const {
 
 bool KVStore::throwForStatus(int status) {
     if (status != Ok) {
-        if (KVStore::codes.contains(status)) {
+        if (KVStore::codes.count(status)) {
             throw RocksException(KVStore::codes.at(status));
         }
         else {
