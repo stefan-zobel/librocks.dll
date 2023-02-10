@@ -93,6 +93,7 @@ private:
     rocksdb::Transaction* reusableTx_;
     std::unordered_map<std::string, KindImpl> kinds;
     std::string path;
+    std::string version;
     mutable int code;
     uint64_t totalSinceLastSync;
     std::chrono::steady_clock::time_point lastSync;

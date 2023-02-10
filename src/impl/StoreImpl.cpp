@@ -2,6 +2,7 @@
 #include <thread>
 #include "impl/StoreImpl.h"
 #include "impl/SimpleLogger.h"
+#include "rocksdb/version.h"
 
 constexpr uint64_t DEFAULT_COMPACTION_MEMTABLE_MEMORY_BUDGET = 512L * 1024L * 1024L;
 
@@ -48,7 +49,7 @@ void StoreImpl::open_() {
     options.WAL_size_limit_MB = 64L;
     options.recycle_log_file_num = 10;
     options.IncreaseParallelism(std::max(std::thread::hardware_concurrency(), 2u));
-    options.info_log_level = rocksdb::InfoLogLevel::INFO_LEVEL; // TODO
+    options.info_log_level = rocksdb::InfoLogLevel::WARN_LEVEL;
     txnDbOptions.write_policy = rocksdb::TxnDBWritePolicy::WRITE_COMMITTED;
     columnFamilyOptions.periodic_compaction_seconds = 1L * 24L * 60L * 60L;
     columnFamilyOptions.OptimizeLevelStyleCompaction(DEFAULT_COMPACTION_MEMTABLE_MEMORY_BUDGET);
@@ -57,7 +58,12 @@ void StoreImpl::open_() {
     rocksdb::Status s = openDatabase();
     if (s.ok()) {
         reusableTx_ = reusableTx();
-        __LOG_INFO __LARG(std::string("RocksDD database opened : ").append(path).c_str());
+        const std::unordered_map<std::string, std::string>& build = rocksdb::GetRocksBuildProperties();
+        version.append("RocksDD version: ").append(rocksdb::GetRocksVersionAsString());
+        version.append(", Git sha: ").append(build.at("rocksdb_build_git_sha"));
+        version.append(", Compiled: ").append(build.at("rocksdb_build_date"));
+        __LOG_INFO __LARG(version);
+        __LOG_INFO __LARG(std::string("Database opened at: ").append(path));
         open = true;
     }
     else {
