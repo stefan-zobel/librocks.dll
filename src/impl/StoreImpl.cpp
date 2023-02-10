@@ -58,7 +58,7 @@ void StoreImpl::open_() {
     rocksdb::Status s = openDatabase();
     if (s.ok()) {
         reusableTx_ = reusableTx();
-        const std::unordered_map<std::string, std::string>& build = rocksdb::GetRocksBuildProperties();
+        auto& build = rocksdb::GetRocksBuildProperties();
         version.append("RocksDD version: ").append(rocksdb::GetRocksVersionAsString());
         version.append(", Git sha: ").append(build.at("rocksdb_build_git_sha"));
         version.append(", Compiled: ").append(build.at("rocksdb_build_date"));
