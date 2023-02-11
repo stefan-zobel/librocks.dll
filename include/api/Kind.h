@@ -12,5 +12,5 @@ struct LIBROCKS_API Kind : public RocksType, public ToString {
 
     virtual bool operator<(const Kind& other) const noexcept = 0;
 
-    virtual ~Kind() = default;
+    ~Kind() override = default;
 };
