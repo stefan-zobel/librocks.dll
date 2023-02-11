@@ -1,5 +1,6 @@
 
 #include "client/bytes.h"
+#include <cstring> // std::memcpy
 #include <stdio.h> // printf TODO: remove
 
 bytes::bytes(bytes const& other) : size_(0), data_(nullptr) {

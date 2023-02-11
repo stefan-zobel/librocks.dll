@@ -2,7 +2,6 @@
 #include <thread>
 #include "impl/StoreImpl.h"
 #include "impl/SimpleLogger.h"
-#include "rocksdb/version.h"
 
 constexpr uint64_t DEFAULT_COMPACTION_MEMTABLE_MEMORY_BUDGET = 512L * 1024L * 1024L;
 

@@ -8,11 +8,11 @@ public:
     RocksException() = default;
     virtual ~RocksException() = default;
 
-    RocksException(char* message);
-    RocksException(const char* message);
+    explicit RocksException(char* message);
+    explicit RocksException(const char* message);
     RocksException(const char* file, long line, const char* message);
-    RocksException(std::string message);
-    RocksException(std::string& message);
+    explicit RocksException(const std::string& message);
+    explicit RocksException(std::string& message);
     RocksException(const char* file, long line, std::string& message);
 
     const char* what() const;
@@ -21,5 +21,5 @@ private:
     std::string msg;
 
 private:
-    std::string l2s(long value);
+    static std::string l2s(long value);
 };

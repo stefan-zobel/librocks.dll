@@ -36,6 +36,7 @@ class Logger {
 public: // instance methods, constructor & destructor
     Logger();
     ~Logger();
+    Logger& operator= (const Logger&) = delete; // assignment operator
 
     Logger& get(LogLevel level = LogLevel::LOG_INFO);
     Logger& append(const char*);
@@ -55,7 +56,6 @@ public: // static methods
 
 private:
     Logger(const Logger&); // copy constructor
-    Logger& operator= (const Logger&) = delete; // assignment operator
 
 private: // static methods
     static FILE*& stream() noexcept;

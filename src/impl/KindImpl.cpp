@@ -48,7 +48,3 @@ void KindImpl::closeHandle() {
     delete handle_;
     handle_ = nullptr;
 }
-
-KindImpl::~KindImpl() {
-    // nothing special here
-}

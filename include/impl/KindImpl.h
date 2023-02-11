@@ -30,7 +30,7 @@ public:
 
     void closeHandle();
 
-    ~KindImpl() override;
+    ~KindImpl() override = default;
 
 private:
     std::string name_;

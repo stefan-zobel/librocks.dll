@@ -14,7 +14,7 @@ RocksException::RocksException(const char* file, long line, const char* message)
     msg.append(file).append(":").append(l2s(line)).append(": ").append(message).append("\n");
 }
 
-RocksException::RocksException(std::string message) {
+RocksException::RocksException(const std::string& message) {
     msg.append(message).append("\n");
 }
 

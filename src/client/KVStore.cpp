@@ -1,7 +1,6 @@
 
 #include "client/KVStore.h"
 #include "client/RocksException.h"
-#include "api/StatusCode.h"
 
 KVStore::KVStore(Store* pStore) : store(pStore) {
 }
