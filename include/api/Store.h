@@ -12,5 +12,9 @@ struct LIBROCKS_API Store : public ExtendedOps {
 
     virtual KindManager& getKindManager(int* status) const noexcept = 0;
 
+    virtual void compact(int* status, const Kind& kind) noexcept = 0;
+
+    virtual void compactAll(int* status) noexcept = 0;
+
     ~Store() override = default;
 };

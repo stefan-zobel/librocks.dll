@@ -539,3 +539,11 @@ char* StoreImpl::findMaxKey(int* status, const Kind& k, size_t* resultLen) const
     }
     return nullptr;
 }
+
+void StoreImpl::compact(int* status, const Kind& kind) noexcept {
+    // TODO
+}
+
+void StoreImpl::compactAll(int* status) noexcept {
+    // TODO
+}

@@ -58,6 +58,10 @@ public:
 
     void flushNoWait() noexcept override;
 
+    void compact(int* status, const Kind& kind) noexcept override;
+
+    void compactAll(int* status) noexcept override;
+
     ~StoreImpl() override;
 
 private:
