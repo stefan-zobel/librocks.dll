@@ -32,6 +32,6 @@ std::string RocksException::l2s(long value) {
     return std::string(buffer);
 }
 
-const char* RocksException::what() const {
+const char* RocksException::what() const noexcept {
     return msg.c_str();
 }

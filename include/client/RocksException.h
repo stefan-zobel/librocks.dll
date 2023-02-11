@@ -15,7 +15,7 @@ public:
     explicit RocksException(std::string& message);
     RocksException(const char* file, long line, std::string& message);
 
-    const char* what() const;
+    const char* what() const noexcept;
 
 private:
     std::string msg;

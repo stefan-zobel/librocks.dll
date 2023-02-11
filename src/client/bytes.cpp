@@ -1,17 +1,14 @@
 
 #include "client/bytes.h"
 #include <cstring> // std::memcpy
-#include <stdio.h> // printf TODO: remove
 
 bytes::bytes(bytes const& other) : size_(0), data_(nullptr) {
     if (other.size_ > 0) {
         copy(other);
     }
-    printf("bytes copy constructor called\n");
 }
 
 bytes& bytes::operator=(bytes const& other) {
-    printf("bytes copy assignment operator called\n");
     if (this != &other) {
         clear();
         if (other.size_ > 0) {
@@ -23,12 +20,10 @@ bytes& bytes::operator=(bytes const& other) {
 
 bytes::bytes(bytes&& moving) noexcept : size_(0), data_(nullptr) {
     moving.swap(*this);
-    printf("bytes move constructor called\n");
 }
 
 bytes& bytes::operator=(bytes&& moving) noexcept {
     moving.swap(*this);
-    printf("bytes move assignment operator called\n");
     return *this;
 }
 
