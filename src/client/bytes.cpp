@@ -20,11 +20,6 @@ bytes& bytes::operator=(bytes const& other) {
     return *this;
 }
 
-bytes& bytes::operator=(std::nullptr_t) {
-    clear();
-    return *this;
-}
-
 bytes::bytes(bytes&& moving) noexcept : size_(0), data_(nullptr) {
     moving.swap(*this);
     printf("bytes move constructor called\n");

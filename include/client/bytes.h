@@ -12,8 +12,6 @@ public:
 
     bytes& operator=(bytes const& other);
 
-    bytes& operator=(std::nullptr_t); // XXX ?
-
     bytes(bytes&& moving) noexcept;
 
     bytes& operator=(bytes&& moving) noexcept;
