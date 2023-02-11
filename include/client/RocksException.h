@@ -6,7 +6,7 @@
 class RocksException : public std::runtime_error {
 
 public:
-    RocksException() : std::runtime_error("") {}
+    RocksException() : std::runtime_error(NAME) {}
     virtual ~RocksException() = default;
 
     explicit RocksException(char* message);
@@ -18,4 +18,5 @@ public:
 
 private:
     static std::string l2s(long value);
+    static const std::string NAME;
 };
