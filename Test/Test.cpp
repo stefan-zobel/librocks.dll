@@ -3,6 +3,7 @@
 #include "client/KVStore.h"
 #include "client/RocksException.h"
 #include "client/bytes.h"
+#include <exception>
 #include <string>
 #include <iostream>
 
@@ -59,7 +60,7 @@ int main() {
 
         kv.close();
     }
-    catch (const RocksException& e) {
+    catch (const std::exception& e) {
         std::cout << "Error: " << e.what();
     }
     std::cout << "Finished\n";
