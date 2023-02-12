@@ -1,6 +1,6 @@
 .vs/
-/backup/
 /lib/
 /pdb/
+/Test/rocksdb_database/
 /Test/x64/
 /x64/
