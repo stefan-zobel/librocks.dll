@@ -40,6 +40,28 @@ const Kind& KVStore::getOrCreateKind(std::string& kindName) {
     return k;
 }
 
+bool comparator(const std::reference_wrapper<const Kind>& a, const std::reference_wrapper<const Kind>& b) noexcept {
+    return a.get() < b.get();
+}
+
+const KindSet KVStore::getKinds() const {
+    int status = Ok;
+    size_t resultLen = 0;
+    const Kind** ppK = getKindManager().getKinds(&status, &resultLen);
+    KindSet kinds(&comparator);
+    if (status == Ok) {
+        for (size_t i = 0; i < resultLen; ++i) {
+            const Kind& kind = dynamic_cast<const Kind&>(*ppK[i]);
+            kinds.insert(std::cref(kind));
+        }
+        delete[] ppK;
+    }
+    else {
+        throwForStatus(status);
+    }
+    return kinds;
+}
+
 KindManager& KVStore::getKindManager() const {
     int status = Ok;
     KindManager& mgr = store->getKindManager(&status);

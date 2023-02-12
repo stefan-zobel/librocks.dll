@@ -1,10 +1,14 @@
 #pragma once
 
-#include <string>
+#include <functional>
 #include <map>
+#include <set>
+#include <string>
 #include "client/bytes.h"
 #include "api/Kind.h"
 #include "api/Store.h"
+
+typedef std::set<std::reference_wrapper<const Kind>, bool(*)(const std::reference_wrapper<const Kind>&, const std::reference_wrapper<const Kind>&)> KindSet;
 
 class KVStore {
 public:
@@ -40,6 +44,8 @@ public:
     const Kind& getDefaultKind() const;
 
     const Kind& getOrCreateKind(std::string& kindName);
+
+    const KindSet getKinds() const;
 
     void compact(const Kind& kind);
 

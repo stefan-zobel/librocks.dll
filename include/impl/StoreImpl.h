@@ -26,6 +26,8 @@ public:
 
     const Kind& getOrCreateKind(int* status, const char* kindName) noexcept override;
 
+    const Kind** getKinds(int* status, size_t* resultLen) const noexcept override;
+
     void put(int* status, const Kind& kind, const char* key, size_t keyLen, const char* value,
         size_t valLen) noexcept override;
 

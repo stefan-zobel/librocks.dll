@@ -20,6 +20,10 @@ int main() {
 
         kv.compactAll();
 
+        for (auto& kind : kv.getKinds()) {
+            std::cout << kind.get().name() << "\n";
+        }
+
         std::string kindName1 = "ABCDEF";
         const Kind& newKind = kv.getOrCreateKind(kindName1);
 

@@ -131,6 +131,25 @@ KindManager& StoreImpl::getKindManager(int* status) const noexcept {
     return *const_cast<StoreImpl*>(this);
 }
 
+const Kind** StoreImpl::getKinds(int* status, size_t* resultLen) const noexcept {
+    synchronize(monitor);
+    if (validateOpen(status)) {
+        size_t i = 0;
+        size_t size = kinds.size();
+        const Kind** ppK = new const Kind*[size];
+        for (auto& it : kinds) {
+            ppK[i] = &it.second;
+            ++i;
+        }
+        *resultLen = size;
+        return ppK;
+    }
+    else {
+        assign(Closed, status);
+        return nullptr;
+    }
+}
+
 const Kind& StoreImpl::getDefaultKind(int* status) const noexcept {
     synchronize(monitor);
     if (validateOpen(status)) {
