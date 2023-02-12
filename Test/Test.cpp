@@ -18,6 +18,8 @@ int main() {
             return -1;
         }
 
+        kv.compactAll();
+
         std::string kindName1 = "ABCDEF";
         const Kind& newKind = kv.getOrCreateKind(kindName1);
 

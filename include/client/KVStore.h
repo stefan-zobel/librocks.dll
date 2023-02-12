@@ -41,6 +41,10 @@ public:
 
     const Kind& getOrCreateKind(std::string& kindName);
 
+    void compact(const Kind& kind);
+
+    void compactAll();
+
 private:
     Store* store;
 

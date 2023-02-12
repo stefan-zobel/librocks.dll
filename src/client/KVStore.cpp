@@ -145,6 +145,22 @@ bytes KVStore::findMaxKey(const Kind& kind) const {
     return bytes(maxKey, resultLen);
 }
 
+void KVStore::compact(const Kind& kind) {
+    int status = Ok;
+    store->compact(&status, kind);
+    if (status != Ok) {
+        throwForStatus(status);
+    }
+}
+
+void KVStore::compactAll() {
+    int status = Ok;
+    store->compactAll(&status);
+    if (status != Ok) {
+        throwForStatus(status);
+    }
+}
+
 
 bool KVStore::throwForStatus(int status) {
     if (status != Ok) {
