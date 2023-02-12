@@ -21,7 +21,7 @@ int main() {
         kv.compactAll();
 
         for (auto& kind : kv.getKinds()) {
-            std::cout << kind.get().name() << "\n";
+            std::cout << kind.get().name() << std::endl;
         }
 
         std::string kindName1 = "ABCDEF";
@@ -39,25 +39,25 @@ int main() {
 
         kv.singleRemove(newKind, newKey2b);
         bytes removed1 = kv.singleRemoveIfPresent(newKind, newKey2c);
-        std::cout << "removed1 is empty : " << removed1.isEmpty() << "\n";
+        std::cout << "removed1 is empty : " << removed1.isEmpty() << std::endl;
         bytes removed2 = kv.removeIfPresent(newKind, newKey2d);
-        std::cout << "removed2 is empty : " << removed2.isEmpty() << "\n";
+        std::cout << "removed2 is empty : " << removed2.isEmpty() << std::endl;
 
         std::string newKey3 = "newKey_3";
         bytes result = kv.get(newKind, newKey3);
-        std::cout << "result is empty : " << result.isEmpty() << "\n";
+        std::cout << "result is empty : " << result.isEmpty() << std::endl;
 
         std::string newKey4 = "newKey_4";
         std::string newValue4 = "ABC";
         std::string newValue5 = "XYZ";
 
         bytes result2 = kv.updateIfPresent(newKind, newKey4, newValue4);
-        std::cout << "result2 is empty : " << result2.isEmpty() << "\n";
+        std::cout << "result2 is empty : " << result2.isEmpty() << std::endl;
         bytes result3 = kv.updateIfPresent(newKind, newKey4, newValue5);
-        std::cout << "result3 is empty : " << result2.isEmpty() << "\n";
+        std::cout << "result3 is empty : " << result2.isEmpty() << std::endl;
 
         bool wasAbsent = kv.putIfAbsent(newKind, newKey4, newValue4);
-        std::cout << "wasAbsent: " << wasAbsent << "\n";
+        std::cout << "wasAbsent: " << wasAbsent << std::endl;
 
         std::string kindName2 = "GHIJKL";
         const Kind& newKind2 = kv.getOrCreateKind(kindName2);
