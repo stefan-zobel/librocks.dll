@@ -540,10 +540,47 @@ char* StoreImpl::findMaxKey(int* status, const Kind& k, size_t* resultLen) const
     return nullptr;
 }
 
-void StoreImpl::compact(int* status, const Kind& kind) noexcept {
-    // TODO
+void StoreImpl::compact(int* status, const Kind& k) noexcept {
+    if (!k.isValid()) {
+        assign(InvalidArgument, status);
+        return;
+    }
+    KindImpl* kind = toKindImpl(k, status);
+    if (!kind) {
+        return;
+    }
+    synchronize(monitor);
+    if (validateOpen(status)) {
+        compactKind(status, k);
+    }
+    else {
+        assign(Closed, status);
+    }
 }
 
 void StoreImpl::compactAll(int* status) noexcept {
-    // TODO
+    synchronize(monitor);
+    if (validateOpen(status)) {
+        for (auto& it : kinds) {
+            if (!compactKind(status, it.second)) {
+                break;
+            }
+        }
+    }
+    else {
+        assign(Closed, status);
+    }
+}
+
+bool StoreImpl::compactKind(int* status, const Kind& kind) noexcept {
+    const KindImpl& impl = dynamic_cast<const KindImpl&>(kind);
+    rocksdb::ColumnFamilyHandle* cfHandle = impl.handle();
+    rocksdb::Status s = txnDb->CompactRange(rocksdb::CompactRangeOptions(), cfHandle, nullptr, nullptr);
+    if (s.ok()) {
+        return true;
+    }
+    else {
+        assign(s.code(), status);
+        return false;
+    }
 }

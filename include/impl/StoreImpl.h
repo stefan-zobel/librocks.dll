@@ -81,6 +81,7 @@ private:
     char* get_(int* status, const Kind& kind, size_t* resultLen, const char* key, size_t keyLen)
         const noexcept;
     void singleRemove_(int* status, const Kind& kind, const char* key, size_t keyLen) noexcept;
+    bool compactKind(int* status, const Kind& kind) noexcept;
 
 private:
     bool open;
