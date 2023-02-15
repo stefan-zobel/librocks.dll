@@ -190,6 +190,7 @@
     <ClInclude Include="include\client\KVStore.h" />
     <ClInclude Include="include\client\RocksException.h" />
     <ClInclude Include="include\impl\KindImpl.h" />
+    <ClInclude Include="include\impl\KueueImpl.h" />
     <ClInclude Include="include\impl\SameType.h" />
     <ClInclude Include="include\impl\SimpleLogger.h" />
     <ClInclude Include="include\impl\StoreImpl.h" />
