@@ -5,6 +5,17 @@
 #include <mutex>
 
 
+static void putU64BE(unsigned __int64 x, char* dst) {
+    unsigned __int64 be = _byteswap_uint64(x);
+    memcpy(dst, reinterpret_cast<unsigned char*>(&be), sizeof(unsigned __int64));
+}
+
+static unsigned __int64 getU64BE(const char* src) {
+    unsigned __int64 be = 0uLL;
+    memcpy(&be, src, sizeof(unsigned __int64));
+    return _byteswap_uint64(be);
+}
+
 class KueueImpl {
 public:
 
@@ -75,11 +86,11 @@ private:
 
 private:
     // Total number of successful puts
-    unsigned long long totalPuts_{0uL};
+    unsigned long long totalPuts_{0uLL};
     // Total number of successful takes
-    unsigned long long totalTakes_{0uL};
+    unsigned long long totalTakes_{0uLL};
     // Current number of messages
-    std::atomic_llong count{0L};
+    std::atomic_llong count{0LL};
     // Lock held by put
     std::mutex putLock;
     // Lock held by take
