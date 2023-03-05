@@ -10,9 +10,10 @@ constexpr unsigned __int64 MIN_KEY = 0x0000000000000000;
 constexpr unsigned __int64 MAX_KEY = 0xFFFFFFFFFFFFFFFF;
 
 
-static void putU64BE(unsigned __int64 x, char* dst) {
+static char* putU64BE(unsigned __int64 x, char* dst) {
     unsigned __int64 be = _byteswap_uint64(x);
     memcpy(dst, reinterpret_cast<unsigned char*>(&be), sizeof(unsigned __int64));
+    return dst;
 }
 
 static unsigned __int64 getU64BE(const char* src) {
@@ -61,49 +62,63 @@ public:
         }
     }
 
-    void put(int* status, size_t valLen) noexcept { // XXX
+    void put(int* status, const char* value, size_t valLen) noexcept {
+        int r = Ok;
+        int* state = status ? status : &r;
         if (isValid_) {
             long long c = -1LL;
             {
+                char key[sizeof(unsigned __int64)];
                 std::lock_guard<std::mutex> lock(putLock);
-                //store->put()
-                // TODO: put(...)
-                c = count.fetch_add(1LL);
-                ++totalPuts_;
+                store->put(state, getKindRef(), putU64BE(maxKey++, &key[0]), sizeof(unsigned __int64), value, valLen);
+                if (*state == Ok) {
+                    c = count.fetch_add(1LL);
+                    ++totalPuts_;
+                }
+                else {
+                    --maxKey;
+                }
             }
             if (c == 0LL) {
                 signalNotEmpty();
             }
         }
         else {
-            *status = Invalid;
+            *state = Invalid;
         }
     }
 
-    void take(int* status, size_t* valLen) noexcept { // XXX
+    char* take(int* status, size_t* valLen) noexcept {
+        int r = Ok;
+        int* state = status ? status : &r;
         if (isValid_) {
             long long c = -1LL;
+            char key[sizeof(unsigned __int64)];
             std::unique_lock<std::mutex> lock(takeLock);
             while (count.load() == 0LL) {
                 notEmpty.wait(lock);
             }
-            // TODO: take(...)
-            //store->singleRemoveIfPresent();
-            c = count.fetch_sub(1LL);
-            ++totalTakes_;
+            char* value = store->singleRemoveIfPresent(state, getKindRef(), valLen, putU64BE(minKey, &key[0]), sizeof(unsigned __int64));
+            if (*state == Ok) {
+                c = count.fetch_sub(1LL);
+                ++totalTakes_;
+                ++minKey;
+            }
             if (c > 1LL) {
                 // signal other waiting takers
                 notEmpty.notify_one();
             }
-            // TODO: return ...
+            return value;
         }
         else {
-            *status = Invalid;
-            // TODO: return
+            *state = Invalid;
+            return nullptr;
         }
     }
 
     void clear(int* status) noexcept {
+        int r = Ok;
+        int* state = status ? status : &r;
         if (isValid_) {
             // Locks to prevent both puts and takes
             std::lock_guard<std::mutex> put(putLock);
@@ -116,7 +131,7 @@ public:
             // Unlocks to allow both puts and takes
         }
         else {
-            *status = Invalid;
+            *state = Invalid;
         }
     }
 
@@ -151,8 +166,13 @@ private:
         std::unique_lock<std::mutex> lock(takeLock);
         notEmpty.notify_one();
     }
+
     // constructor for the static void queue instance
     explicit KueueImpl(bool) : count(0LL), minKey(MIN_KEY), maxKey(MIN_KEY), store(nullptr) {
+    }
+
+    const Kind& getKindRef() {
+        return *const_cast<const Kind*>(queueKind);
     }
 
 private:
