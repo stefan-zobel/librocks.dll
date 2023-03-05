@@ -1,5 +1,6 @@
 #pragma once
 
+constexpr int Invalid = -5;
 constexpr int NoIterator = -4;
 constexpr int AlreadyExists = -3;
 constexpr int NoTransaction = -2;

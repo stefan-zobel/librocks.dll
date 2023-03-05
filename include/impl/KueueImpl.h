@@ -24,7 +24,7 @@ static unsigned __int64 getU64BE(const char* src) {
 class KueueImpl {
 public:
 
-    KueueImpl(StoreImpl* kvStore, std::string id) : count(0LL), minKey(MIN_KEY), maxKey(MIN_KEY), store(kvStore), queueId(id), isValid(false) {
+    KueueImpl(StoreImpl* kvStore, std::string id) : count(0LL), minKey(MIN_KEY), maxKey(MIN_KEY), store(kvStore), queueId(id) {
         int state = Ok;
         KindManager& manager = store->getKindManager(&state);
         if (state == Ok) {
@@ -52,7 +52,7 @@ public:
                         }
                         if (lastMax >= minKey) {
                             count.store(maxKey - minKey);
-                            isValid = (count.load() >= 0LL);
+                            isValid_ = (count.load() >= 0LL);
                         }
                     }
                 }
@@ -60,45 +60,63 @@ public:
         }
     }
 
-    void put() noexcept { // XXX
-        long long c = -1L;
-        {
-            std::lock_guard<std::mutex> lock(putLock);
-            // TODO: put(...)
-            c = count.fetch_add(1L);
-            ++totalPuts_;
+    void put(int* status, size_t valLen) noexcept { // XXX
+        if (isValid_) {
+            long long c = -1LL;
+            {
+                std::lock_guard<std::mutex> lock(putLock);
+                //store->put()
+                // TODO: put(...)
+                c = count.fetch_add(1LL);
+                ++totalPuts_;
+            }
+            if (c == 0LL) {
+                signalNotEmpty();
+            }
         }
-        if (c == 0L) {
-            signalNotEmpty();
+        else {
+            *status = Invalid;
         }
     }
 
-    void take() noexcept { // XXX
-        long long c = -1L;
-        std::unique_lock<std::mutex> lock(takeLock);
-        while (count.load() == 0L) {
-            notEmpty.wait(lock);
-        }
-        // TODO: take(...)
-        c = count.fetch_sub(1L);
-        ++totalTakes_;
-        if (c > 1L) {
-            // signal other waiting takers
-            notEmpty.notify_one();
-        }
-        // TODO: return ...
-    }
-
-    void clear() noexcept {
-        // Locks to prevent both puts and takes
-        std::lock_guard<std::mutex> put(putLock);
-        std::lock_guard<std::mutex> take(takeLock);
-        while (count.load() > 0L) {
-            // TODO: clear(...)
-            count.fetch_sub(1L);
+    void take(int* status, size_t* valLen) noexcept { // XXX
+        if (isValid_) {
+            long long c = -1LL;
+            std::unique_lock<std::mutex> lock(takeLock);
+            while (count.load() == 0LL) {
+                notEmpty.wait(lock);
+            }
+            // TODO: take(...)
+            //store->singleRemoveIfPresent();
+            c = count.fetch_sub(1LL);
             ++totalTakes_;
+            if (c > 1LL) {
+                // signal other waiting takers
+                notEmpty.notify_one();
+            }
+            // TODO: return ...
         }
-        // Unlocks to allow both puts and takes
+        else {
+            *status = Invalid;
+            // TODO: return
+        }
+    }
+
+    void clear(int* status) noexcept {
+        if (isValid_) {
+            // Locks to prevent both puts and takes
+            std::lock_guard<std::mutex> put(putLock);
+            std::lock_guard<std::mutex> take(takeLock);
+            while (count.load() > 0LL) {
+                // TODO: clear(...)
+                count.fetch_sub(1LL);
+                ++totalTakes_;
+            }
+            // Unlocks to allow both puts and takes
+        }
+        else {
+            *status = Invalid;
+        }
     }
 
     long long size() const noexcept {
@@ -107,6 +125,10 @@ public:
 
     bool isEmpty() const noexcept {
         return size() == 0LL;
+    }
+
+    bool isValid() const noexcept {
+        return isValid_;
     }
 
     unsigned long long totalPuts() const noexcept {
@@ -129,7 +151,7 @@ private:
         notEmpty.notify_one();
     }
     // constructor for the static void queue instance
-    explicit KueueImpl(bool) : count(0LL), minKey(MIN_KEY), maxKey(MIN_KEY), store(nullptr), isValid(false) {
+    explicit KueueImpl(bool) : count(0LL), minKey(MIN_KEY), maxKey(MIN_KEY), store(nullptr) {
     }
 
 private:
@@ -152,7 +174,7 @@ private:
     // backing store
     StoreImpl* store;
     // false for the void queue, otherwise true if Kueue initialization succeeds
-    bool isValid;
+    bool isValid_ = false;
 };
 
 KueueImpl KueueImpl::VoidKueue = KueueImpl(false);
