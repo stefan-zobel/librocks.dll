@@ -21,10 +21,10 @@
     <ClCompile Include="..\src\client\bytes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\client\KVStore.cpp">
+    <ClCompile Include="..\src\client\RocksException.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\client\RocksException.cpp">
+    <ClCompile Include="..\src\client\KVStore.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
