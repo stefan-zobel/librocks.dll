@@ -81,7 +81,7 @@
     <ClInclude Include="include\impl\KueueImpl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\impl\KueueManager.h">
+    <ClInclude Include="include\impl\KueueManagerImpl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
