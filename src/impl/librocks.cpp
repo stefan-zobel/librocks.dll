@@ -2,6 +2,7 @@
 #include "api/librocks.h"
 #include "impl/utils.h"
 #include "impl/StoreImpl.h"
+#include "impl/KueueManagerImpl.h"
 
 
 Store* openStore(int* status, const char* path) {
@@ -16,15 +17,13 @@ Store* openStore(int* status, const char* path) {
     return nullptr;
 }
 
-// TODO: only for temporary testing
-//KueueManagerImpl* openKueueManagerImpl(int* status, const char* path) {
-//    assign(Ok, status);
-//    KueueManagerImpl* mgr = new KueueManagerImpl(status, path);
-//    if (mgr->isOpen()) {
-//        return mgr;
-//    }
-//    assign(Closed, status);
-//    mgr->close();
-//    delete mgr;
-//    return nullptr;
-//}
+KueueManager* openKueueManager(int* status, const char* path) {
+    assign(Ok, status);
+    KueueManagerImpl* mgr = new KueueManagerImpl(status, path);
+    if (mgr->isOpen()) {
+        return mgr;
+    }
+    mgr->close();
+    delete mgr;
+    return nullptr;
+}

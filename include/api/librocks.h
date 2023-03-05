@@ -2,7 +2,7 @@
 
 #include "api/api.h"
 #include "api/Store.h"
-//#include "impl/KueueManager.h" // TODO: only for temporary testing
+#include "api/KueueManager.h"
 
 
 #ifdef __cplusplus
@@ -11,8 +11,7 @@ extern "C" {
 
 LIBROCKS_API Store* openStore(int* status, const char* path);
 
-// TODO: only for temporary testing
-//LIBROCKS_API KueueManagerImpl* openKueueManagerImpl(int* status, const char* path);
+LIBROCKS_API KueueManager* openKueueManager(int* status, const char* path);
 
 #ifdef __cplusplus
 }
