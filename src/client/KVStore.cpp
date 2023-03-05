@@ -198,6 +198,7 @@ bool KVStore::throwForStatus(int status) {
 
 static std::map<int, std::string> initCodes() {
     std::map<int, std::string> m;
+    m[Invalid] = "Invalid";
     m[NoIterator] = "NoIterator";
     m[AlreadyExists] = "AlreadyExists";
     m[NoTransaction] = "NoTransaction";
