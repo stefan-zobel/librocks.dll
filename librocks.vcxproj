@@ -181,6 +181,7 @@
     <ClInclude Include="include\api\ExtendedOps.h" />
     <ClInclude Include="include\api\Kind.h" />
     <ClInclude Include="include\api\KindManager.h" />
+    <ClInclude Include="include\api\Kueue.h" />
     <ClInclude Include="include\api\librocks.h" />
     <ClInclude Include="include\api\RocksType.h" />
     <ClInclude Include="include\api\StatusCode.h" />

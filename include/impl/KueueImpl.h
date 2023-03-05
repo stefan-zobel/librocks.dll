@@ -3,6 +3,7 @@
 #include <atomic>
 #include <condition_variable>
 #include <mutex>
+#include "api/Kueue.h"
 #include "impl/StoreImpl.h"
 
 
@@ -22,7 +23,7 @@ static unsigned __int64 getU64BE(const char* src) {
     return _byteswap_uint64(be);
 }
 
-class KueueImpl {
+class KueueImpl : public Kueue {
 public:
 
     KueueImpl(StoreImpl* kvStore, std::string id) : count(0LL), minKey(MIN_KEY), maxKey(MIN_KEY), store(kvStore),
