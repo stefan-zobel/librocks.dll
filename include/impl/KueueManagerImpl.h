@@ -3,8 +3,9 @@
 #include "impl/StoreImpl.h"
 #include "impl/KueueImpl.h"
 #include "impl/utils.h"
+#include "api/KueueManager.h"
 
-class KueueManagerImpl {
+class KueueManagerImpl : public KueueManager {
 public:
     KueueManagerImpl(int* status, const char* path) : store(nullptr) {
         assign(Ok, status);
@@ -19,7 +20,7 @@ public:
         }
     }
 
-    KueueImpl* get(int* status, const char* id) {
+    KueueImpl* get(int* status, const char* id) noexcept {
         synchronize(monitor);
         if (validateOpen(status)) {
             if (auto queue = queues.find(std::string(id)); queue != queues.end()) {
@@ -39,7 +40,7 @@ public:
         return store != nullptr && store->isOpen();
     }
 
-    void close() {
+    void close() noexcept {
         synchronize(monitor);
         close_();
     }
