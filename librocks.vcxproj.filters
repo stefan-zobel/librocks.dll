@@ -81,6 +81,9 @@
     <ClInclude Include="include\impl\KueueImpl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\impl\KueueManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\impl\librocks.cpp">
