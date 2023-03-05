@@ -24,12 +24,13 @@ static unsigned __int64 getU64BE(const char* src) {
 class KueueImpl {
 public:
 
-    KueueImpl(StoreImpl* kvStore, std::string id) : count(0LL), minKey(MIN_KEY), maxKey(MIN_KEY), store(kvStore), queueId(id) {
+    KueueImpl(StoreImpl* kvStore, std::string id) : count(0LL), minKey(MIN_KEY), maxKey(MIN_KEY), store(kvStore), queueId(id), queueKind(StoreImpl::EmptyKind) {
         int state = Ok;
         KindManager& manager = store->getKindManager(&state);
         if (state == Ok) {
             const Kind& kind = manager.getOrCreateKind(&state, queueId.c_str());
             if (state == Ok && kind.isValid()) {
+                queueKind = kind;
                 size_t length = 0;
                 char* smallestKey = store->findMinKey(&state, kind, &length);
                 if (state == Ok) {
@@ -151,7 +152,7 @@ private:
         notEmpty.notify_one();
     }
     // constructor for the static void queue instance
-    explicit KueueImpl(bool) : count(0LL), minKey(MIN_KEY), maxKey(MIN_KEY), store(nullptr) {
+    explicit KueueImpl(bool) : count(0LL), minKey(MIN_KEY), maxKey(MIN_KEY), store(nullptr), queueKind(StoreImpl::EmptyKind) {
     }
 
 private:
@@ -173,6 +174,8 @@ private:
     std::string queueId;
     // backing store
     StoreImpl* store;
+    // Kind object for this Kueue
+    const Kind& queueKind;
     // false for the void queue, otherwise true if Kueue initialization succeeds
     bool isValid_ = false;
 };
