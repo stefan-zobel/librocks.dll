@@ -25,7 +25,9 @@ static unsigned __int64 getU64BE(const char* src) {
 class KueueImpl {
 public:
 
-    KueueImpl(StoreImpl* kvStore, std::string id) : count(0LL), minKey(MIN_KEY), maxKey(MIN_KEY), store(kvStore), queueId(id) {
+    KueueImpl(StoreImpl* kvStore, std::string id) : count(0LL), minKey(MIN_KEY), maxKey(MIN_KEY), store(kvStore),
+        queueId(id) {
+
         int state = Ok;
         KindManager& manager = store->getKindManager(&state);
         if (state == Ok) {
@@ -98,11 +100,12 @@ public:
             while (count.load() == 0LL) {
                 notEmpty.wait(lock);
             }
-            char* value = store->singleRemoveIfPresent(state, getKindRef(), valLen, putU64BE(minKey, &key[0]), sizeof(unsigned __int64));
+            char* value = store->singleRemoveIfPresent(state, getKindRef(), valLen, putU64BE(minKey, &key[0]),
+                sizeof(unsigned __int64));
             if (*state == Ok) {
+                ++minKey;
                 c = count.fetch_sub(1LL);
                 ++totalTakes_;
-                ++minKey;
             }
             if (c > 1LL) {
                 // signal other waiting takers
@@ -120,13 +123,24 @@ public:
         int r = Ok;
         int* state = status ? status : &r;
         if (isValid_) {
+            size_t valLen = 0;
+            char key[sizeof(unsigned __int64)];
+            const Kind& kindRef = getKindRef();
             // Locks to prevent both puts and takes
             std::lock_guard<std::mutex> put(putLock);
             std::lock_guard<std::mutex> take(takeLock);
             while (count.load() > 0LL) {
-                // TODO: clear(...)
-                count.fetch_sub(1LL);
-                ++totalTakes_;
+                char* value = store->singleRemoveIfPresent(state, kindRef, &valLen, putU64BE(minKey, &key[0]),
+                    sizeof(unsigned __int64));
+                if (*state == Ok) {
+                    ++minKey;
+                    delete[] value;
+                    count.fetch_sub(1LL);
+                    ++totalTakes_;
+                }
+                else {
+                    break;
+                }
             }
             // Unlocks to allow both puts and takes
         }
