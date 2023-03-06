@@ -111,5 +111,3 @@ private:
     inline static const std::string DefaultCF = rocksdb::kDefaultColumnFamilyName;
     inline static const KindImpl EmptyKind = KindImpl();
 };
-
-//extern /*inline*/ const KindImpl EmptyKind = KindImpl();
