@@ -27,7 +27,6 @@ class KueueImpl : public Kueue {
 public:
 
     KueueImpl(StoreImpl* kvStore, std::string id) : count(0LL), minKey(MIN_KEY), maxKey(MIN_KEY), store(kvStore) {
-
         int state = Ok;
         KindManager& manager = store->getKindManager(&state);
         if (state == Ok) {
