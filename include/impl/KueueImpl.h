@@ -26,13 +26,12 @@ static unsigned __int64 getU64BE(const char* src) {
 class KueueImpl : public Kueue {
 public:
 
-    KueueImpl(StoreImpl* kvStore, std::string id) : count(0LL), minKey(MIN_KEY), maxKey(MIN_KEY), store(kvStore),
-        queueId(id) {
+    KueueImpl(StoreImpl* kvStore, std::string id) : count(0LL), minKey(MIN_KEY), maxKey(MIN_KEY), store(kvStore) {
 
         int state = Ok;
         KindManager& manager = store->getKindManager(&state);
         if (state == Ok) {
-            const Kind& kind = manager.getOrCreateKind(&state, queueId.c_str());
+            const Kind& kind = manager.getOrCreateKind(&state, id.c_str());
             if (state == Ok && kind.isValid()) {
                 queueKind = &const_cast<Kind&>(kind);
                 size_t length = 0;
@@ -170,20 +169,12 @@ public:
         return totalTakes_;
     }
 
-public:
-    // a void Kueue
-    static KueueImpl VoidKueue;
-
 private:
 
     // Signals a waiting take. Called only from put.
     void signalNotEmpty() noexcept {
         std::unique_lock<std::mutex> lock(takeLock);
         notEmpty.notify_one();
-    }
-
-    // constructor for the static void queue instance
-    explicit KueueImpl(bool) : count(0LL), minKey(MIN_KEY), maxKey(MIN_KEY), store(nullptr) {
     }
 
     const Kind& getKindRef() {
@@ -205,14 +196,10 @@ private:
     std::condition_variable notEmpty;
     unsigned __int64 minKey;
     unsigned __int64 maxKey;
-    // column family name
-    std::string queueId;
     // backing store
     StoreImpl* store;
     // Kind object for this Kueue
     Kind* queueKind = nullptr;
-    // false for the void queue, otherwise true if Kueue initialization succeeds
+    // true if Kueue initialization succeeds, otherwise false
     bool isValid_ = false;
 };
-
-KueueImpl KueueImpl::VoidKueue = KueueImpl(false);
