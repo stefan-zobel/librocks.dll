@@ -129,6 +129,7 @@ public:
             std::lock_guard<std::mutex> put(putLock);
             std::lock_guard<std::mutex> take(takeLock);
             while (count.load() > 0LL) {
+                // TODO: this could be optimized
                 char* value = store->singleRemoveIfPresent(state, kindRef, &valLen, putU64BE(minKey, &key[0]),
                     sizeof(unsigned __int64));
                 if (*state == Ok) {
