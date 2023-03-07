@@ -4,7 +4,7 @@
 
 struct LIBROCKS_API Clearable {
 
-    virtual bool clear() = 0;
+    virtual void clear(int* status) noexcept = 0;
 
     virtual ~Clearable() = default;
 };
