@@ -122,19 +122,15 @@ public:
         int r = Ok;
         int* state = status ? status : &r;
         if (isValid_) {
-            size_t valLen = 0;
             char key[sizeof(unsigned __int64)];
             const Kind& kindRef = getKindRef();
             // Locks to prevent both puts and takes
             std::lock_guard<std::mutex> put(putLock);
             std::lock_guard<std::mutex> take(takeLock);
             while (count.load() > 0LL) {
-                // TODO: this could be optimized
-                char* value = store->singleRemoveIfPresent(state, kindRef, &valLen, putU64BE(minKey, &key[0]),
-                    sizeof(unsigned __int64));
+                store->singleRemove(state, kindRef, putU64BE(minKey, &key[0]), sizeof(unsigned __int64));
                 if (*state == Ok) {
                     ++minKey;
-                    delete[] value;
                     count.fetch_sub(1LL);
                     ++totalTakes_;
                 }
