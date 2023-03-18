@@ -190,7 +190,9 @@ private:
     std::mutex takeLock;
     // Wait queue for waiting takes
     std::condition_variable notEmpty;
+    // current smallest key
     unsigned __int64 minKey;
+    // current largest key
     unsigned __int64 maxKey;
     // backing store
     StoreImpl* store;
