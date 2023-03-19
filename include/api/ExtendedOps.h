@@ -25,5 +25,8 @@ struct LIBROCKS_API ExtendedOps : public BasicOps {
 
     virtual char* findMaxKey(int* status, const Kind& kind, size_t* resultLen) const noexcept = 0;
 
+    virtual void removeRange(int* status, const Kind& kind, const char* beginKeyInclusive,
+        size_t beginKeyLen, const char* endKeyExclusive, size_t endKeyLen) noexcept = 0;
+
     ~ExtendedOps() override = default;
 };

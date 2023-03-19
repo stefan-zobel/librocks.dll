@@ -65,7 +65,7 @@ public:
     void compactAll(int* status) noexcept override;
 
     void removeRange(int* status, const Kind& kind, const char* beginKeyInclusive, size_t beginKeyLen,
-        const char* endKeyExclusive, size_t endKeyLen) noexcept;
+        const char* endKeyExclusive, size_t endKeyLen) noexcept override;
 
     ~StoreImpl() override;
 
