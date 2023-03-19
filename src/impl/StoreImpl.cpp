@@ -215,6 +215,39 @@ void StoreImpl::remove(int* status, const Kind& kind, const char* key, size_t ke
     }
 }
 
+void StoreImpl::removeRange(int* status, const Kind& k, const char* beginKeyInclusive, size_t beginKeyLen,
+    const char* endKeyExclusive, size_t endKeyLen) noexcept {
+
+    if (!beginKeyInclusive || !endKeyExclusive || !k.isValid()) {
+        assign(InvalidArgument, status);
+        return;
+    }
+    synchronize(monitor);
+    if (validateOpen(status)) {
+        KindImpl* kind = toKindImpl(k, status);
+        if (!kind) {
+            return;
+        }
+        rocksdb::TransactionDBWriteOptimizations optim;
+        optim.skip_concurrency_control = true;
+        rocksdb::WriteBatch wb;
+        rocksdb::Status s = wb.DeleteRange(kind->handle(), rocksdb::Slice(beginKeyInclusive, beginKeyLen),
+            rocksdb::Slice(endKeyExclusive, endKeyLen));
+        if (s.ok()) {
+            s = txnDb->Write(writeOptions, optim, &wb);
+            if (!s.ok()) {
+                assign(s.code(), status);
+            }
+        }
+        else {
+            assign(s.code(), status);
+        }
+    }
+    else {
+        assign(Closed, status);
+    }
+}
+
 char* StoreImpl::get(int* status, const Kind& kind, size_t* resultLen, const char* key,
     size_t keyLen) const noexcept {
 
