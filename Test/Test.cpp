@@ -65,6 +65,18 @@ int main() {
         bytes maxKey = kv.findMaxKey(newKind2);
 
         kv.close();
+
+        Store* store = openStore(&status, ".\\rocksdb_database");
+        status = Ok;
+        const Kind& theKind = store->getKindManager(&status).getOrCreateKind(&status, "ABCDEF");
+        store->put(&status, theKind, "a", 1, "val1", 4);
+        store->put(&status, theKind, "b", 1, "val2", 4);
+        store->put(&status, theKind, "c", 1, "val3", 4);
+        store->removeRange(&status, theKind, "a", 1, "d", 1);
+        size_t resSize = 0;
+        char* val = store->get(&status, theKind, &resSize, "a", 1);
+        delete[] val;
+        store->close();
     }
     catch (const std::exception& e) {
         std::cout << "Error: " << e.what();
