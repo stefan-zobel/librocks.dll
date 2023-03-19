@@ -199,6 +199,7 @@
     <ClInclude Include="include\impl\StoreImpl.h" />
     <ClInclude Include="include\impl\utils.h" />
     <ClInclude Include="include\rocksdb\db.h" />
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\client\bytes.cpp" />
@@ -209,6 +210,9 @@
     <ClCompile Include="src\impl\SimpleLogger.cpp" />
     <ClCompile Include="src\impl\StoreImpl.cpp" />
     <ClCompile Include="src\impl\utils.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="librocks.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
