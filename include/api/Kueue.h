@@ -11,5 +11,13 @@ struct LIBROCKS_API Kueue : public Clearable {
 
     virtual void clear(int* status) noexcept override = 0;
 
+    virtual long long size() const noexcept = 0;
+
+    virtual bool isEmpty() const noexcept = 0;
+
+    virtual unsigned long long totalPuts() const noexcept = 0;
+
+    virtual unsigned long long totalTakes() const noexcept = 0;
+
     virtual ~Kueue() = default;
 };

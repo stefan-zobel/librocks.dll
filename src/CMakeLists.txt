@@ -12,8 +12,11 @@ file(GLOB SOURCES
         "${PROJECT_SOURCE_DIR}/api/*.c"
         "${PROJECT_SOURCE_DIR}/impl/*.cpp"
         "${PROJECT_SOURCE_DIR}/impl/*.c"
+        "${PROJECT_SOURCE_DIR}/client/*.cpp"
+        "${PROJECT_SOURCE_DIR}/client/*.c"
         "${PROJECT_SOURCE_DIR}/../include/api/*.h"
         "${PROJECT_SOURCE_DIR}/../include/impl/*.h"
+        "${PROJECT_SOURCE_DIR}/../include/client/*.h"
         )
 
 add_compile_definitions(LIBROCKS_EXPORTS=1)

@@ -26,7 +26,7 @@ static unsigned __int64 getU64BE(const char* src) {
 class KueueImpl : public Kueue {
 public:
 
-    KueueImpl(StoreImpl* kvStore, std::string id) : count(0LL), minKey(MIN_KEY), maxKey(MIN_KEY), store(kvStore) {
+    KueueImpl(StoreImpl* kvStore, const std::string& id) : count(0LL), minKey(MIN_KEY), maxKey(MIN_KEY), store(kvStore) {
         int state = Ok;
         KindManager& manager = store->getKindManager(&state);
         if (state == Ok) {
@@ -63,7 +63,7 @@ public:
         }
     }
 
-    void put(int* status, const char* value, size_t valLen) noexcept {
+    void put(int* status, const char* value, size_t valLen) noexcept override {
         int r = Ok;
         int* state = status ? status : &r;
         if (isValid_) {
@@ -89,7 +89,7 @@ public:
         }
     }
 
-    char* take(int* status, size_t* valLen) noexcept {
+    char* take(int* status, size_t* valLen) noexcept override {
         int r = Ok;
         int* state = status ? status : &r;
         if (isValid_) {
@@ -118,7 +118,7 @@ public:
         }
     }
 
-    void clear(int* status) noexcept {
+    void clear(int* status) noexcept override {
         int r = Ok;
         int* state = status ? status : &r;
         if (isValid_) {
@@ -145,11 +145,11 @@ public:
         }
     }
 
-    long long size() const noexcept {
+    long long size() const noexcept override {
         return count.load();
     }
 
-    bool isEmpty() const noexcept {
+    bool isEmpty() const noexcept override {
         return size() == 0LL;
     }
 
@@ -157,11 +157,11 @@ public:
         return isValid_;
     }
 
-    unsigned long long totalPuts() const noexcept {
+    unsigned long long totalPuts() const noexcept override {
         return totalPuts_;
     }
 
-    unsigned long long totalTakes() const noexcept {
+    unsigned long long totalTakes() const noexcept override {
         return totalTakes_;
     }
 
