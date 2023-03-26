@@ -8,7 +8,7 @@
 #include "api/Kind.h"
 #include "api/Store.h"
 
-typedef std::set<std::reference_wrapper<const Kind>, bool(*)(const std::reference_wrapper<const Kind>&, const std::reference_wrapper<const Kind>&)> KindSet;
+using KindSet = std::set<std::reference_wrapper<const Kind>, bool(*)(const std::reference_wrapper<const Kind>&, const std::reference_wrapper<const Kind>&)>;
 
 class KVStore {
 public:
