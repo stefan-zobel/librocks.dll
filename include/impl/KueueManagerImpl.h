@@ -9,7 +9,7 @@ class KueueManagerImpl : public KueueManager {
 public:
     KueueManagerImpl(int* status, const char* path) : store(nullptr) {
         assign(Ok, status);
-        StoreImpl* impl = new StoreImpl(path);
+        auto impl = new StoreImpl(path);
         if (impl->isOpen()) {
             store = impl;
         }
@@ -20,7 +20,7 @@ public:
         }
     }
 
-    KueueImpl* get(int* status, const char* id) noexcept {
+    KueueImpl* get(int* status, const char* id) noexcept override {
         synchronize(monitor);
         if (validateOpen(status)) {
             if (auto queue = queues.find(std::string(id)); queue != queues.end()) {
@@ -28,7 +28,7 @@ public:
             }
             else {
                 std::string identifier = id;
-                KueueImpl* pKueue = new KueueImpl(store, identifier);
+                auto pKueue = new KueueImpl(store, identifier);
                 queues[identifier] = pKueue;
                 return pKueue;
             }
@@ -36,16 +36,16 @@ public:
         return nullptr;
     }
 
-    inline bool isOpen() const noexcept {
+    inline bool isOpen() const noexcept override {
         return store != nullptr && store->isOpen();
     }
 
-    void close() noexcept {
+    void close() noexcept override {
         synchronize(monitor);
         close_();
     }
 
-    ~KueueManagerImpl() {
+    ~KueueManagerImpl() override {
         close_();
     }
 
@@ -56,9 +56,7 @@ private:
                 delete it.second;
             }
             queues.clear();
-            if (store) {
-                delete store;
-            }
+            delete store;
             store = nullptr;
         }
     }

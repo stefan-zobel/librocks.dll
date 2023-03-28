@@ -22,7 +22,7 @@ static std::string ownPath() {
             }
         }
     }
-    return std::string();
+    return {};
 }
 
 static const std::string today() {

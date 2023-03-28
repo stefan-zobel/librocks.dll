@@ -6,7 +6,7 @@
 constexpr uint64_t DEFAULT_COMPACTION_MEMTABLE_MEMORY_BUDGET = 512L * 1024L * 1024L;
 
 inline static KindImpl* toKindImpl(const Kind& k, int* status) {
-    KindImpl* kind = dynamic_cast<KindImpl*>(const_cast<Kind*>(&k));
+    auto kind = dynamic_cast<KindImpl*>(const_cast<Kind*>(&k));
     if (!kind) {
         assign(InvalidArgument, status);
     }

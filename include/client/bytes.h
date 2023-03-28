@@ -40,7 +40,7 @@ public:
     }
 
     inline std::string toString() const {
-        return std::string(data_, size_);
+        return { data_, size_ };
     }
 
     void clear();
