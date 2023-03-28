@@ -5,6 +5,7 @@
 
 struct LIBROCKS_API KueueManager {
 
+    [[nodiscard("return value must be closed and delete[]d")]]
     virtual Kueue* get(int* status, const char* id) noexcept = 0;
 
     virtual bool isOpen() const noexcept = 0;

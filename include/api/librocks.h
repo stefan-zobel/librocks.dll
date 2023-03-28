@@ -9,8 +9,10 @@
 extern "C" {
 #endif
 
+[[nodiscard("return value must be closed and delete[]d")]]
 LIBROCKS_API Store* openStore(int* status, const char* path);
 
+[[nodiscard("return value must be closed and delete[]d")]]
 LIBROCKS_API KueueManager* openKueueManager(int* status, const char* path);
 
 #ifdef __cplusplus

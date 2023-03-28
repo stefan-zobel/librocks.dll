@@ -6,9 +6,11 @@ struct LIBROCKS_API ExtendedOps : public BasicOps {
 
     virtual void singleRemove(int* status, const Kind& kind, const char* key, size_t keyLen) noexcept = 0;
 
+    [[nodiscard("return value must be delete[]d")]]
     virtual char* singleRemoveIfPresent(int* status, const Kind& kind, size_t* resultLen, const char* key,
         size_t keyLen) noexcept = 0;
 
+    [[nodiscard("return value must be delete[]d")]]
     virtual char* removeIfPresent(int* status, const Kind& kind, size_t* resultLen, const char* key,
         size_t keyLen) noexcept = 0;
 
@@ -21,8 +23,10 @@ struct LIBROCKS_API ExtendedOps : public BasicOps {
 
     virtual void flushNoWait() noexcept = 0;
 
+    [[nodiscard("return value must be delete[]d")]]
     virtual char* findMinKey(int* status, const Kind& kind, size_t* resultLen) const noexcept = 0;
 
+    [[nodiscard("return value must be delete[]d")]]
     virtual char* findMaxKey(int* status, const Kind& kind, size_t* resultLen) const noexcept = 0;
 
     virtual void removeRange(int* status, const Kind& kind, const char* beginKeyInclusive,
