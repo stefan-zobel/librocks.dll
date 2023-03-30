@@ -197,30 +197,30 @@ bool KVStore::throwForStatus(int status) {
 }
 
 static std::map<int, std::string> initCodes() {
-    std::map<int, std::string> m;
-    m[Invalid] = "Invalid";
-    m[NoIterator] = "NoIterator";
-    m[AlreadyExists] = "AlreadyExists";
-    m[NoTransaction] = "NoTransaction";
-    m[Closed] = "Closed";
-    m[Ok] = "Ok";
-    m[NotFound] = "NotFound";
-    m[Corruption] = "Corruption";
-    m[NotSupported] = "NotSupported";
-    m[InvalidArgument] = "InvalidArgument";
-    m[IOError] = "IOError";
-    m[MergeInProgress] = "MergeInProgress";
-    m[Incomplete] = "Incomplete";
-    m[ShutdownInProgress] = "ShutdownInProgress";
-    m[TimedOut] = "TimedOut";
-    m[Aborted] = "Aborted";
-    m[Busy] = "Busy";
-    m[Expired] = "Expired";
-    m[TryAgain] = "TryAgain";
-    m[CompactionTooLarge] = "CompactionTooLarge";
-    m[ColumnFamilyDropped] = "ColumnFamilyDropped";
-    m[Unknown] = "Unknown";
-    return m;
+    return {
+        {Invalid, "Invalid"},
+        {NoIterator, "NoIterator"},
+        {AlreadyExists, "AlreadyExists"},
+        {NoTransaction, "NoTransaction"},
+        {Closed, "Closed"},
+        {Ok, "Ok"},
+        {NotFound, "NotFound"},
+        {Corruption, "Corruption"},
+        {NotSupported, "NotSupported"},
+        {InvalidArgument, "InvalidArgument"},
+        {IOError, "IOError"},
+        {MergeInProgress, "MergeInProgress"},
+        {Incomplete, "Incomplete"},
+        {ShutdownInProgress, "ShutdownInProgress"},
+        {TimedOut, "TimedOut"},
+        {Aborted, "Aborted"},
+        {Busy, "Busy"},
+        {Expired, "Expired"},
+        {TryAgain, "TryAgain"},
+        {CompactionTooLarge, "CompactionTooLarge"},
+        {ColumnFamilyDropped, "ColumnFamilyDropped"},
+        {Unknown, "Unknown"}
+    };
 }
 
 const std::map<int, std::string> KVStore::codes = initCodes();
