@@ -40,9 +40,7 @@ void bytes::clear() {
 }
 
 void bytes::swap(bytes& src) noexcept {
-    size_t tmp = size_;
-    size_ = src.size_;
-    src.size_ = tmp;
+    std::swap(size_, src.size_);
     std::swap(data_, src.data_);
 }
 
