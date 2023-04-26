@@ -8,9 +8,9 @@ class KVStore;
 class bytes {
 public:
 
-    bytes(bytes const& other);
+    bytes(const bytes& other);
 
-    bytes& operator=(bytes const& other);
+    bytes& operator=(const bytes& other);
 
     bytes(bytes&& moving) noexcept;
 
@@ -53,7 +53,7 @@ private:
     explicit bytes(char* bytes, size_t length) : size_(length), data_(bytes) {
     }
 
-    void copy(bytes const& other);
+    void copy(const bytes& other);
 
 private:
     size_t size_;

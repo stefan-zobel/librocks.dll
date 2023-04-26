@@ -2,13 +2,13 @@
 #include "client/bytes.h"
 #include <cstring> // std::memcpy
 
-bytes::bytes(bytes const& other) : size_(0), data_(nullptr) {
+bytes::bytes(const bytes& other) : size_(0), data_(nullptr) {
     if (other.size_ > 0) {
         copy(other);
     }
 }
 
-bytes& bytes::operator=(bytes const& other) {
+bytes& bytes::operator=(const bytes& other) {
     if (this != &other) {
         clear();
         if (other.size_ > 0) {
@@ -44,7 +44,7 @@ void bytes::swap(bytes& src) noexcept {
     std::swap(data_, src.data_);
 }
 
-void bytes::copy(bytes const& other) {
+void bytes::copy(const bytes& other) {
     size_ = other.size_;
     char* tmp = new char[other.size_];
     std::memcpy(tmp, other.data_, other.size_);
