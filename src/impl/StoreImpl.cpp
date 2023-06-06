@@ -334,7 +334,7 @@ char* StoreImpl::get_(int* status, const Kind& k, size_t* resultLen, const char*
         if (!pinnable.empty()) {
             *resultLen = pinnable.size();
             char* data = new char[*resultLen];
-            memcpy(data, pinnable.data(), *resultLen);
+            std::memcpy(data, pinnable.data(), *resultLen);
             return data;
         }
     }
@@ -539,7 +539,7 @@ char* StoreImpl::findMinKey(int* status, const Kind& k, size_t* resultLen) const
                 if (!key.empty()) {
                     *resultLen = key.size();
                     minKey = new char[*resultLen];
-                    memcpy(minKey, key.data(), *resultLen);
+                    std::memcpy(minKey, key.data(), *resultLen);
                 }
             }
             delete it;
@@ -576,7 +576,7 @@ char* StoreImpl::findMaxKey(int* status, const Kind& k, size_t* resultLen) const
                 if (!key.empty()) {
                     *resultLen = key.size();
                     maxKey = new char[*resultLen];
-                    memcpy(maxKey, key.data(), *resultLen);
+                    std::memcpy(maxKey, key.data(), *resultLen);
                 }
             }
             delete it;
