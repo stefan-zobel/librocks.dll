@@ -513,7 +513,7 @@ void StoreImpl::syncAndReset() noexcept {
 void StoreImpl::occasionalWalSync() noexcept {
     ++totalSinceLastSync;
     if ((since(lastSync) >= FLUSH_TIME_WINDOW_MILLIS)
-        || (totalSinceLastSync % FLUSH_BATCH_SIZE == 0L)) {
+        || ((totalSinceLastSync & FLUSH_BATCH_SIZE) == 0L)) {
         syncAndReset();
     }
 }
