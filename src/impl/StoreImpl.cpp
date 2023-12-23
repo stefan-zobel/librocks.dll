@@ -58,7 +58,7 @@ void StoreImpl::open_() {
     if (s.ok()) {
         reusableTx_ = reusableTx();
         auto& build = rocksdb::GetRocksBuildProperties();
-        version.append("RocksDD version: ").append(rocksdb::GetRocksVersionAsString());
+        version.append("RocksDB version: ").append(rocksdb::GetRocksVersionAsString());
         version.append(", Git sha: ").append(build.at("rocksdb_build_git_sha"));
         version.append(", Compiled: ").append(build.at("rocksdb_build_date"));
         __LOG_INFO __LARG(version);
