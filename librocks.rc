@@ -13,7 +13,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Englisch (neutral) resources
+// English (Neutral) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 LANGUAGE LANG_ENGLISH, SUBLANG_NEUTRAL
@@ -51,8 +51,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 8,6,7,1
- PRODUCTVERSION 8,6,7,1
+ FILEVERSION 8,10,0,1
+ PRODUCTVERSION 8,10,0,1
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -68,12 +68,12 @@ BEGIN
         BLOCK "040904b0"
         BEGIN
             VALUE "FileDescription", "librocks"
-            VALUE "FileVersion", "8.6.7.1"
+            VALUE "FileVersion", "8.10.0.1"
             VALUE "InternalName", "librocks.dll"
             VALUE "LegalCopyright", "Copyright (C) 2023"
             VALUE "OriginalFilename", "librocks.dll"
             VALUE "ProductName", "librocks"
-            VALUE "ProductVersion", "8.6.7.1"
+            VALUE "ProductVersion", "8.10.0.1"
         END
     END
     BLOCK "VarFileInfo"
@@ -82,7 +82,7 @@ BEGIN
     END
 END
 
-#endif    // Englisch (neutral) resources
+#endif    // English (Neutral) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
