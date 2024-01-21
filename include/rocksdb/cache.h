@@ -570,6 +570,6 @@ extern std::shared_ptr<Cache> NewTieredCache(
 //    again
 extern Status UpdateTieredCache(
     const std::shared_ptr<Cache>& cache, int64_t total_capacity = -1,
-    double compressed_secondary_ratio = std::numeric_limits<double>::max(),
+    double compressed_secondary_ratio = (std::numeric_limits<double>::max)(),
     TieredAdmissionPolicy adm_policy = TieredAdmissionPolicy::kAdmPolicyMax);
 }  // namespace ROCKSDB_NAMESPACE
