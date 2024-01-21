@@ -295,6 +295,9 @@ struct CompressedSecondaryCacheOptions : LRUCacheOptions {
   // The compression method (if any) that is used to compress data.
   CompressionType compression_type = CompressionType::kLZ4Compression;
 
+  // Options specific to the compression algorithm
+  CompressionOptions compression_opts;
+
   // compress_format_version can have two values:
   // compress_format_version == 1 -- decompressed size is not included in the
   // block header.
@@ -567,6 +570,6 @@ extern std::shared_ptr<Cache> NewTieredCache(
 //    again
 extern Status UpdateTieredCache(
     const std::shared_ptr<Cache>& cache, int64_t total_capacity = -1,
-    double compressed_secondary_ratio = (std::numeric_limits<double>::max)(),
+    double compressed_secondary_ratio = std::numeric_limits<double>::max(),
     TieredAdmissionPolicy adm_policy = TieredAdmissionPolicy::kAdmPolicyMax);
 }  // namespace ROCKSDB_NAMESPACE
