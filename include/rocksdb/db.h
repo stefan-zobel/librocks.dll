@@ -131,16 +131,31 @@ struct IngestExternalFileArg {
   IngestExternalFileOptions options;
   std::vector<std::string> files_checksums;
   std::vector<std::string> files_checksum_func_names;
+  // A hint as to the temperature for *reading* the files to be ingested.
   Temperature file_temperature = Temperature::kUnknown;
 };
 
 struct GetMergeOperandsOptions {
+  using ContinueCallback = std::function<bool(Slice)>;
+
   // A limit on the number of merge operands returned by the GetMergeOperands()
   // API. In contrast with ReadOptions::merge_operator_max_count, this is a hard
   // limit: when it is exceeded, no merge operands will be returned and the
   // query will fail with an Incomplete status. See also the
   // DB::GetMergeOperands() API below.
   int expected_max_number_of_operands = 0;
+
+  // `continue_cb` will be called after reading each merge operand, excluding
+  // any base value. Operands are read in order from newest to oldest. The
+  // operand value is provided as an argument.
+  //
+  // Returning false will end the lookup process at the merge operand on which
+  // `continue_cb` was just invoked. Returning true allows the lookup to
+  // continue.
+  //
+  // If it is nullptr, `GetMergeOperands()` will behave as if it always returned
+  // true (continue fetching merge operands until there are no more).
+  ContinueCallback continue_cb;
 };
 
 // A collections of table properties objects, where
@@ -642,11 +657,12 @@ class DB {
   }
 
   // Populates the `merge_operands` array with all the merge operands in the DB
-  // for `key`. The `merge_operands` array will be populated in the order of
-  // insertion. The number of entries populated in `merge_operands` will be
-  // assigned to `*number_of_operands`.
+  // for `key`, or a customizable suffix of merge operands when
+  // `GetMergeOperandsOptions::continue_cb` is set. The `merge_operands` array
+  // will be populated in the order of insertion. The number of entries
+  // populated in `merge_operands` will be assigned to `*number_of_operands`.
   //
-  // If the number of merge operands in DB for `key` is greater than
+  // If the number of merge operands to return for `key` is greater than
   // `merge_operands_options.expected_max_number_of_operands`,
   // `merge_operands` is not populated and the return value is
   // `Status::Incomplete`. In that case, `*number_of_operands` will be assigned
@@ -954,6 +970,15 @@ class DB {
       const ReadOptions& options,
       const std::vector<ColumnFamilyHandle*>& column_families,
       std::vector<Iterator*>* iterators) = 0;
+
+  // UNDER CONSTRUCTION - DO NOT USE
+  // Return a cross-column-family iterator from a consistent database state.
+  // When the same key is present in multiple column families, the iterator
+  // selects the value or columns from the first column family containing the
+  // key, in the order specified by the `column_families` parameter.
+  virtual std::unique_ptr<Iterator> NewMultiCfIterator(
+      const ReadOptions& options,
+      const std::vector<ColumnFamilyHandle*>& column_families) = 0;
 
   // Return a handle to the current DB state.  Iterators created with
   // this handle will all observe a stable snapshot of the current DB
@@ -1803,6 +1828,16 @@ class DB {
   //     the files cannot be ingested to the bottommost level, and it is the
   //     user's responsibility to clear the bottommost level in the overlapping
   //     range before re-attempting the ingestion.
+  //
+  // EXPERIMENTAL: the temperatures of the files after ingestion are currently
+  // determined like this:
+  // - If the ingested file is moved rather than copied, its temperature is
+  //   inherited from the input file.
+  // - If either ingest_behind or fail_if_not_bottommost_level is set to true,
+  //   then the temperature is set to the CF's last_level_temperature.
+  // - Otherwise, the temperature is set to the CF's default_write_temperature.
+  // (Landing in the last level does not currently guarantee using
+  // last_level_temperature - TODO)
   virtual Status IngestExternalFile(
       ColumnFamilyHandle* column_family,
       const std::vector<std::string>& external_files,
