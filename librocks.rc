@@ -51,8 +51,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 9,3,1,1
- PRODUCTVERSION 9,3,1,1
+ FILEVERSION 9,4,0,1
+ PRODUCTVERSION 9,4,0,1
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -68,12 +68,12 @@ BEGIN
         BLOCK "040904b0"
         BEGIN
             VALUE "FileDescription", "librocks"
-            VALUE "FileVersion", "9.3.1.1"
+            VALUE "FileVersion", "9.4.0.1"
             VALUE "InternalName", "librocks.dll"
             VALUE "LegalCopyright", "Copyright (C) 2024"
             VALUE "OriginalFilename", "librocks.dll"
             VALUE "ProductName", "librocks"
-            VALUE "ProductVersion", "9.3.1.1"
+            VALUE "ProductVersion", "9.4.0.1"
         END
     END
     BLOCK "VarFileInfo"
