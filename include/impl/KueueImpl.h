@@ -27,15 +27,15 @@ class KueueImpl : public Kueue {
 public:
 
     KueueImpl(StoreImpl* kvStore, const std::string& id) : count(0LL), minKey(MIN_KEY), maxKey(MIN_KEY), store(kvStore) {
-        int state = Ok;
+        int state = Status::Ok;
         KindManager& manager = store->getKindManager(&state);
-        if (state == Ok) {
+        if (state == Status::Ok) {
             const Kind& kind = manager.getOrCreateKind(&state, id.c_str());
-            if (state == Ok && kind.isValid()) {
+            if (state == Status::Ok && kind.isValid()) {
                 queueKind = &const_cast<Kind&>(kind);
                 size_t length = 0;
                 char* smallestKey = store->findMinKey(&state, kind, &length);
-                if (state == Ok) {
+                if (state == Status::Ok) {
                     if (smallestKey && length == sizeof(unsigned __int64)) {
                         minKey = getU64BE(smallestKey);
                     }
@@ -43,7 +43,7 @@ public:
                         // minKey remains at MIN_KEY
                     }
                     char* greatestKey = store->findMaxKey(&state, kind, &length);
-                    if (state == Ok) {
+                    if (state == Status::Ok) {
                         unsigned __int64 lastMax = maxKey;
                         if (greatestKey && length == sizeof(unsigned __int64)) {
                             lastMax = getU64BE(greatestKey);
@@ -64,7 +64,7 @@ public:
     }
 
     void put(int* status, const char* value, size_t valLen) noexcept override {
-        int r = Ok;
+        int r = Status::Ok;
         int* state = status ? status : &r;
         if (isValid_) {
             long long c = -1LL;
@@ -72,7 +72,7 @@ public:
                 char key[sizeof(unsigned __int64)];
                 std::lock_guard<std::mutex> lock(putLock);
                 store->put(state, getKindRef(), putU64BE(maxKey++, &key[0]), sizeof(unsigned __int64), value, valLen);
-                if (*state == Ok) {
+                if (*state == Status::Ok) {
                     c = count.fetch_add(1LL);
                     ++totalPuts_;
                 }
@@ -85,12 +85,12 @@ public:
             }
         }
         else {
-            *state = Invalid;
+            *state = Status::Invalid;
         }
     }
 
     char* take(int* status, size_t* valLen) noexcept override {
-        int r = Ok;
+        int r = Status::Ok;
         int* state = status ? status : &r;
         if (isValid_) {
             long long c = -1LL;
@@ -101,7 +101,7 @@ public:
             }
             char* value = store->singleRemoveIfPresent(state, getKindRef(), valLen, putU64BE(minKey, &key[0]),
                 sizeof(unsigned __int64));
-            if (*state == Ok) {
+            if (*state == Status::Ok) {
                 ++minKey;
                 c = count.fetch_sub(1LL);
                 ++totalTakes_;
@@ -113,13 +113,13 @@ public:
             return value;
         }
         else {
-            *state = Invalid;
+            *state = Status::Invalid;
             return nullptr;
         }
     }
 
     void clear(int* status) noexcept override {
-        int r = Ok;
+        int r = Status::Ok;
         int* state = status ? status : &r;
         if (isValid_) {
             char key[sizeof(unsigned __int64)];
@@ -129,7 +129,7 @@ public:
             std::lock_guard<std::mutex> take(takeLock);
             while (count.load() > 0LL) {
                 store->singleRemove(state, kindRef, putU64BE(minKey, &key[0]), sizeof(unsigned __int64));
-                if (*state == Ok) {
+                if (*state == Status::Ok) {
                     ++minKey;
                     count.fetch_sub(1LL);
                     ++totalTakes_;
@@ -141,7 +141,7 @@ public:
             // Unlocks to allow both puts and takes
         }
         else {
-            *state = Invalid;
+            *state = Status::Invalid;
         }
     }
 

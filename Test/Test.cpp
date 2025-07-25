@@ -11,9 +11,9 @@
 int main() {
 
     try {
-        int status = Ok;
+        int status = Status::Ok;
         KVStore kv(openStore(&status, ".\\rocksdb_database"));
-        if (status != Ok) {
+        if (status != Status::Ok) {
             std::cout << "Open failed!\n";
             return -1;
         }
@@ -67,7 +67,7 @@ int main() {
         kv.close();
 
         Store* store = openStore(&status, ".\\rocksdb_database");
-        status = Ok;
+        status = Status::Ok;
         const Kind& theKind = store->getKindManager(&status).getOrCreateKind(&status, "ABCDEF");
         store->put(&status, theKind, "a", 1, "val1", 4);
         store->put(&status, theKind, "b", 1, "val2", 4);

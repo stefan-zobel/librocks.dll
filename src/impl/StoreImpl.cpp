@@ -8,12 +8,12 @@ constexpr uint64_t DEFAULT_COMPACTION_MEMTABLE_MEMORY_BUDGET = 512L * 1024L * 10
 inline static KindImpl* toKindImpl(const Kind& k, int* status) {
     auto kind = dynamic_cast<KindImpl*>(const_cast<Kind*>(&k));
     if (!kind) {
-        assign(InvalidArgument, status);
+        assign(Status::InvalidArgument, status);
     }
     return kind;
 }
 
-StoreImpl::StoreImpl(const char* path_) : open(false), code(Ok), txnDb(nullptr), reusableTx_(nullptr),
+StoreImpl::StoreImpl(const char* path_) : open(false), code(Status::Ok), txnDb(nullptr), reusableTx_(nullptr),
     totalSinceLastSync(0L) {
 
     path.append(path_);
@@ -118,11 +118,11 @@ int StoreImpl::getCode() const noexcept {
 
 inline bool StoreImpl::validateOpen(int* status) const noexcept {
     if (isOpen()) {
-        assign(Ok, status);
+        assign(Status::Ok, status);
         return true;
     }
-    assign(Closed, status);
-    code = Closed;
+    assign(Status::Closed, status);
+    code = Status::Closed;
     return false;
 }
 
@@ -145,7 +145,7 @@ const Kind** StoreImpl::getKinds(int* status, size_t* resultLen) const noexcept 
         return ppK;
     }
     else {
-        assign(Closed, status);
+        assign(Status::Closed, status);
         return nullptr;
     }
 }
@@ -156,7 +156,7 @@ const Kind& StoreImpl::getDefaultKind(int* status) const noexcept {
         if (auto kind = kinds.find(StoreImpl::DefaultCF); kind != kinds.end()) {
             return kind->second;
         }
-        assign(NotFound, status);
+        assign(Status::NotFound, status);
     }
     return StoreImpl::EmptyKind;
 }
@@ -189,7 +189,7 @@ void StoreImpl::put(int* status, const Kind& kind, const char* key, size_t keyLe
     size_t valLen) noexcept {
 
     if (!key || !kind.isValid()) {
-        assign(InvalidArgument, status);
+        assign(Status::InvalidArgument, status);
         return;
     }
     synchronize(monitor);
@@ -197,13 +197,13 @@ void StoreImpl::put(int* status, const Kind& kind, const char* key, size_t keyLe
         put_(status, kind, key, keyLen, value, valLen);
     }
     else {
-        assign(Closed, status);
+        assign(Status::Closed, status);
     }
 }
 
 void StoreImpl::remove(int* status, const Kind& kind, const char* key, size_t keyLen) noexcept {
     if (!key || !kind.isValid()) {
-        assign(InvalidArgument, status);
+        assign(Status::InvalidArgument, status);
         return;
     }
     synchronize(monitor);
@@ -211,7 +211,7 @@ void StoreImpl::remove(int* status, const Kind& kind, const char* key, size_t ke
         remove_(status, kind, key, keyLen);
     }
     else {
-        assign(Closed, status);
+        assign(Status::Closed, status);
     }
 }
 
@@ -219,7 +219,7 @@ void StoreImpl::removeRange(int* status, const Kind& k, const char* beginKeyIncl
     const char* endKeyExclusive, size_t endKeyLen) noexcept {
 
     if (!beginKeyInclusive || !endKeyExclusive || !k.isValid()) {
-        assign(InvalidArgument, status);
+        assign(Status::InvalidArgument, status);
         return;
     }
     synchronize(monitor);
@@ -244,7 +244,7 @@ void StoreImpl::removeRange(int* status, const Kind& k, const char* beginKeyIncl
         }
     }
     else {
-        assign(Closed, status);
+        assign(Status::Closed, status);
     }
 }
 
@@ -252,7 +252,7 @@ char* StoreImpl::get(int* status, const Kind& kind, size_t* resultLen, const cha
     size_t keyLen) const noexcept {
 
     if (!key || !resultLen || !kind.isValid()) {
-        assign(InvalidArgument, status);
+        assign(Status::InvalidArgument, status);
         return nullptr;
     }
     *resultLen = 0;
@@ -260,7 +260,7 @@ char* StoreImpl::get(int* status, const Kind& kind, size_t* resultLen, const cha
     if (validateOpen(status)) {
         return get_(status, kind, resultLen, key, keyLen);
     }
-    assign(Closed, status);
+    assign(Status::Closed, status);
     return nullptr;
 }
 
@@ -288,7 +288,7 @@ void StoreImpl::put_(int* status, const Kind& k, const char* key, size_t keyLen,
         }
     }
     else {
-        assign(NoTransaction, status);
+        assign(Status::NoTransaction, status);
     }
     deleteIfNewTx(tx);
 }
@@ -316,7 +316,7 @@ void StoreImpl::remove_(int* status, const Kind& k, const char* key, size_t keyL
         }
     }
     else {
-        assign(NoTransaction, status);
+        assign(Status::NoTransaction, status);
     }
     deleteIfNewTx(tx);
 }
@@ -348,21 +348,21 @@ char* StoreImpl::updateIfPresent(int* status, const Kind& kind, size_t* resultLe
     size_t keyLen, const char* value, size_t valLen) noexcept {
 
     if (!key || !resultLen || !kind.isValid()) {
-        assign(InvalidArgument, status);
+        assign(Status::InvalidArgument, status);
         return nullptr;
     }
     *resultLen = 0;
     synchronize(monitor);
     if (validateOpen(status)) {
-        int state = Ok;
+        int state = Status::Ok;
         char* oldVal = get_(&state, kind, resultLen, key, keyLen);
-        if (state == Ok) {
+        if (state == Status::Ok) {
             put_(&state, kind, key, keyLen, value, valLen);
         }
         assign(state, status);
         return oldVal;
     }
-    assign(Closed, status);
+    assign(Status::Closed, status);
     return nullptr;
 }
 
@@ -370,21 +370,21 @@ char* StoreImpl::singleRemoveIfPresent(int* status, const Kind& kind, size_t* re
     const char* key, size_t keyLen) noexcept {
 
     if (!key || !resultLen || !kind.isValid()) {
-        assign(InvalidArgument, status);
+        assign(Status::InvalidArgument, status);
         return nullptr;
     }
     *resultLen = 0;
     synchronize(monitor);
     if (validateOpen(status)) {
-        int state = Ok;
+        int state = Status::Ok;
         char* oldVal = get_(&state, kind, resultLen, key, keyLen);
-        if (state == Ok) {
+        if (state == Status::Ok) {
             singleRemove_(&state, kind, key, keyLen);
         }
         assign(state, status);
         return oldVal;
     }
-    assign(Closed, status);
+    assign(Status::Closed, status);
     return nullptr;
 }
 
@@ -392,27 +392,27 @@ char* StoreImpl::removeIfPresent(int* status, const Kind& kind, size_t* resultLe
     size_t keyLen) noexcept {
 
     if (!key || !resultLen || !kind.isValid()) {
-        assign(InvalidArgument, status);
+        assign(Status::InvalidArgument, status);
         return nullptr;
     }
     *resultLen = 0;
     synchronize(monitor);
     if (validateOpen(status)) {
-        int state = Ok;
+        int state = Status::Ok;
         char* oldVal = get_(&state, kind, resultLen, key, keyLen);
-        if (state == Ok) {
+        if (state == Status::Ok) {
             remove_(&state, kind, key, keyLen);
         }
         assign(state, status);
         return oldVal;
     }
-    assign(Closed, status);
+    assign(Status::Closed, status);
     return nullptr;
 }
 
 void StoreImpl::singleRemove(int* status, const Kind& kind, const char* key, size_t keyLen) noexcept {
     if (!key || !kind.isValid()) {
-        assign(InvalidArgument, status);
+        assign(Status::InvalidArgument, status);
         return;
     }
     synchronize(monitor);
@@ -420,7 +420,7 @@ void StoreImpl::singleRemove(int* status, const Kind& kind, const char* key, siz
         singleRemove_(status, kind, key, keyLen);
     }
     else {
-        assign(Closed, status);
+        assign(Status::Closed, status);
     }
 }
 
@@ -446,7 +446,7 @@ void StoreImpl::singleRemove_(int* status, const Kind& k, const char* key, size_
         }
     }
     else {
-        assign(NoTransaction, status);
+        assign(Status::NoTransaction, status);
     }
     deleteIfNewTx(tx);
 }
@@ -455,25 +455,25 @@ void StoreImpl::putIfAbsent(int* status, const Kind& kind, const char* key, size
     size_t valLen) noexcept {
 
     if (!key || !kind.isValid()) {
-        assign(InvalidArgument, status);
+        assign(Status::InvalidArgument, status);
         return;
     }
     synchronize(monitor);
     if (validateOpen(status)) {
         size_t dummyLen;
-        int state = Ok;
+        int state = Status::Ok;
         get_(&state, kind, &dummyLen, key, keyLen);
-        if (state == NotFound) {
-            state = Ok;
+        if (state == Status::NotFound) {
+            state = Status::Ok;
             put_(&state, kind, key, keyLen, value, valLen);
         }
-        else if (state == Ok) {
-            state = AlreadyExists;
+        else if (state == Status::Ok) {
+            state = Status::AlreadyExists;
         }
         assign(state, status);
     }
     else {
-        assign(Closed, status);
+        assign(Status::Closed, status);
     }
 }
 
@@ -520,7 +520,7 @@ void StoreImpl::occasionalWalSync() noexcept {
 
 char* StoreImpl::findMinKey(int* status, const Kind& k, size_t* resultLen) const noexcept {
     if (!k.isValid()) {
-        assign(InvalidArgument, status);
+        assign(Status::InvalidArgument, status);
         return nullptr;
     }
     KindImpl* kind = toKindImpl(k, status);
@@ -546,18 +546,18 @@ char* StoreImpl::findMinKey(int* status, const Kind& k, size_t* resultLen) const
             return minKey;
         }
         else {
-            assign(NoIterator, status);
+            assign(Status::NoIterator, status);
         }
     }
     else {
-        assign(Closed, status);
+        assign(Status::Closed, status);
     }
     return nullptr;
 }
 
 char* StoreImpl::findMaxKey(int* status, const Kind& k, size_t* resultLen) const noexcept {
     if (!k.isValid()) {
-        assign(InvalidArgument, status);
+        assign(Status::InvalidArgument, status);
         return nullptr;
     }
     KindImpl* kind = toKindImpl(k, status);
@@ -583,18 +583,18 @@ char* StoreImpl::findMaxKey(int* status, const Kind& k, size_t* resultLen) const
             return maxKey;
         }
         else {
-            assign(NoIterator, status);
+            assign(Status::NoIterator, status);
         }
     }
     else {
-        assign(Closed, status);
+        assign(Status::Closed, status);
     }
     return nullptr;
 }
 
 void StoreImpl::compact(int* status, const Kind& k) noexcept {
     if (!k.isValid()) {
-        assign(InvalidArgument, status);
+        assign(Status::InvalidArgument, status);
         return;
     }
     KindImpl* kind = toKindImpl(k, status);
@@ -606,7 +606,7 @@ void StoreImpl::compact(int* status, const Kind& k) noexcept {
         compactKind(status, k);
     }
     else {
-        assign(Closed, status);
+        assign(Status::Closed, status);
     }
 }
 
@@ -620,7 +620,7 @@ void StoreImpl::compactAll(int* status) noexcept {
         }
     }
     else {
-        assign(Closed, status);
+        assign(Status::Closed, status);
     }
 }
 

@@ -8,7 +8,7 @@
 class KueueManagerImpl : public KueueManager {
 public:
     KueueManagerImpl(int* status, const char* path) : store(nullptr) {
-        assign(Ok, status);
+        assign(Status::Ok, status);
         auto impl = new StoreImpl(path);
         if (impl->isOpen()) {
             store = impl;
@@ -63,10 +63,10 @@ private:
 
     inline bool validateOpen(int* status) const noexcept {
         if (isOpen()) {
-            assign(Ok, status);
+            assign(Status::Ok, status);
             return true;
         }
-        assign(Closed, status);
+        assign(Status::Closed, status);
         return false;
     }
 

@@ -6,7 +6,7 @@
 
 
 Store* openStore(int* status, const char* path) {
-    assign(Ok, status);
+    assign(Status::Ok, status);
     auto impl = new StoreImpl(path);
     if (impl->isOpen()) {
         return impl;
@@ -18,7 +18,7 @@ Store* openStore(int* status, const char* path) {
 }
 
 KueueManager* openKueueManager(int* status, const char* path) {
-    assign(Ok, status);
+    assign(Status::Ok, status);
     auto mgr = new KueueManagerImpl(status, path);
     if (mgr->isOpen()) {
         return mgr;
