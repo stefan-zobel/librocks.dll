@@ -68,6 +68,7 @@ struct TablePropertiesNames {
   static const std::string kCompressionOptions;
   static const std::string kCreationTime;
   static const std::string kOldestKeyTime;
+  static const std::string kNewestKeyTime;
   static const std::string kFileCreationTime;
   static const std::string kSlowCompressionEstimatedDataSize;
   static const std::string kFastCompressionEstimatedDataSize;
@@ -108,6 +109,10 @@ class TablePropertiesCollector {
   // table.
   // @params key    the user key that is inserted into the table.
   // @params value  the value that is inserted into the table.
+  // @params file_size the current file size. For BlockBasedTable, this
+  //         includes all the data blocks written so far, upto but not including
+  //         the current block being built. With parallel compression, data
+  //         blocks are written async so it depends on the compression progress.
   virtual Status AddUserKey(const Slice& key, const Slice& value,
                             EntryType /*type*/, SequenceNumber /*seq*/,
                             uint64_t /*file_size*/) {
@@ -142,7 +147,7 @@ class TablePropertiesCollector {
   // The name of the properties collector can be used for debugging purpose.
   virtual const char* Name() const = 0;
 
-  // EXPERIMENTAL Return whether the output file should be further compacted
+  // Return whether the output file should be further compacted
   virtual bool NeedCompact() const { return false; }
 
   // For internal use only.
@@ -270,6 +275,8 @@ struct TableProperties {
 
   // Timestamp of the earliest key. 0 means unknown.
   uint64_t oldest_key_time = 0;
+  // Timestamp of the newest key. 0 means unknown.
+  uint64_t newest_key_time = 0;
   // Actual SST file creation time. 0 means unknown.
   uint64_t file_creation_time = 0;
   // Estimated size of data blocks if compressed using a relatively slower
@@ -341,7 +348,20 @@ struct TableProperties {
   // {collector_name[1]},{collector_name[2]},{collector_name[3]} ..
   std::string property_collectors_names;
 
-  // The compression algo used to compress the SST files.
+  // Identifies the compression algorithm or schema used in the file.
+  // Specifically:
+  // * For format_version < 7, it is one of several names for built-in
+  // compression types. Because of how some previous versions of RocksDB
+  // behave, this must be set to "ZSTD" if any blocks are compressed
+  // with zstd and must NOT be set to "NoCompression" if any blocks are
+  // compressed.
+  // * For format_version >= 7, the format is
+  //   <compatibility_name>;<hex-coded compression types>;<future use>
+  // where <compatibility_name> is the CompatibilityName() of the
+  // CompressionManager used for the file, or empty if compression was
+  // disabled; <hex-coded compression types> represents a sorted set of
+  // CompressionType values used in the file other than kNoCompression, each
+  // as 2-digit hex, e.g. 04 for LZ$, 07 for ZSTD, etc.
   std::string compression_name;
 
   // Compression options used to compress the SST files.
@@ -371,6 +391,14 @@ struct TableProperties {
   // Return the approximated memory usage of this TableProperties object,
   // including memory used by the string properties and UserCollectedProperties
   std::size_t ApproximateMemoryUsage() const;
+
+  // Serialize and deserialize Table Properties
+  Status Serialize(const ConfigOptions& opts, std::string* output) const;
+  static Status Parse(const ConfigOptions& opts, const std::string& serialized,
+                      TableProperties* table_properties);
+  bool AreEqual(const ConfigOptions& opts,
+                const TableProperties* other_table_properties,
+                std::string* mismatch) const;
 };
 
 // Extra properties
