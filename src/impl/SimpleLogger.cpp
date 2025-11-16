@@ -99,26 +99,20 @@ static const std::string dateToday()
 static const std::string timeNow()
 {
     const char* errTxt = "Error in timeNow()";
-    // Number of milliseconds since the system was started
-    static DWORD firstTick = GetTickCount();
+
+    SYSTEMTIME st = { 0 };
+    GetLocalTime(&st);
 
     char buffer[MAX_LEN];
-    if (GetTimeFormatA(LOCALE_USER_DEFAULT, 0, nullptr, "HH':'mm':'ss", &buffer[0], MAX_LEN) == 0) {
+    if (GetTimeFormatA(LOCALE_USER_DEFAULT, 0, &st, "HH':'mm':'ss", &buffer[0], MAX_LEN) == 0) {
         return std::string(errTxt);
     }
 
-    // this part is nonsense!
-    const DWORD currTick = GetTickCount();
-    if (currTick < firstTick) {
-        // Repair the GetTickCount() overflow after 49.7 days
-        firstTick = 0L;
-    }
-
-    char result[MAX_LEN] = {0};
-    if (sprintf_s(&result[0], MAX_LEN, "%s.%03ld", &buffer[0], static_cast<long>(currTick - firstTick) % 1000) <= 0) {
+    if (sprintf_s(&buffer[0], MAX_LEN, "%02hu:%02hu:%02hu.%03hu", st.wHour, st.wMinute, st.wSecond, st.wMilliseconds) <= 0) {
         return std::string(errTxt);
     }
-    return std::string(&result[0]);
+
+    return std::string(&buffer[0]);
 }
 
 
