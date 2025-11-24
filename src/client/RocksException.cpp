@@ -31,7 +31,7 @@ RocksException::RocksException(const char* file, long line, std::string& message
 }
 
 std::string RocksException::l2s(long value) {
-    char buffer[64] = { 0 };
+    char buffer[64] = {};
     sprintf_s(buffer, 64, "%ld", value);
     return { buffer };
 }

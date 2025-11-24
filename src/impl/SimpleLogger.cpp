@@ -18,7 +18,7 @@ LogLevel Logger::maxLogLevel = LogLevel::LOG_INFO;
 
 
 const std::string getCurrentThreadId() {
-    char id_[MAX_LEN] = { 0 };
+    char id_[MAX_LEN] = {};
     sprintf_s(&id_[0], MAX_LEN, "%u", GetCurrentThreadId());
     return std::string(&id_[0]);
 }
@@ -100,7 +100,7 @@ static const std::string timeNow()
 {
     const char* errTxt = "Error in timeNow()";
 
-    SYSTEMTIME st = { 0 };
+    SYSTEMTIME st = {};
     GetLocalTime(&st);
 
     char buffer[MAX_LEN];
