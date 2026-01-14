@@ -13,6 +13,8 @@ using KindSet = std::set<std::reference_wrapper<const Kind>, bool(*)(const std::
 class KVStore {
 public:
 
+    explicit KVStore(std::string_view path);
+
     explicit KVStore(Store* store);
 
     ~KVStore();

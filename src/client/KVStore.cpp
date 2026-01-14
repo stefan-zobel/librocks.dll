@@ -1,6 +1,16 @@
 
+#include "api/librocks.h"
 #include "client/KVStore.h"
 #include "client/RocksException.h"
+
+
+KVStore::KVStore(std::string_view path) {
+    int status = Status::Ok;
+    store = openStore(&status, std::string(path).c_str());
+    if (status != Status::Ok) {
+        throwForStatus(status);
+    }
+}
 
 KVStore::KVStore(Store* pStore) : store(pStore) {
 }
@@ -33,7 +43,7 @@ const Kind& KVStore::getDefaultKind() const {
 
 const Kind& KVStore::getOrCreateKind(std::string_view kindName) {
     int status = Status::Ok;
-	// create a copy of kindName to ensure null-termination
+    // create a copy of kindName to ensure null-termination
     const Kind& k = getKindManager().getOrCreateKind(&status, std::string(kindName).c_str());
     if (status != Status::Ok) {
         throwForStatus(status);
