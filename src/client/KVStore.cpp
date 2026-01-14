@@ -198,10 +198,10 @@ void KVStore::compactAll() {
 bool KVStore::throwForStatus(int status) {
     if (status != Status::Ok) {
         if (KVStore::codes.count(status)) {
-            throw RocksException(KVStore::codes.at(status));
+            throw RocksException(status, KVStore::codes.at(status));
         }
         else {
-            throw RocksException("Unknown");
+            throw RocksException(status, "Unknown");
         }
     }
     return false;
