@@ -31,16 +31,17 @@ const Kind& KVStore::getDefaultKind() const {
     return k;
 }
 
-const Kind& KVStore::getOrCreateKind(std::string& kindName) {
+const Kind& KVStore::getOrCreateKind(std::string_view kindName) {
     int status = Status::Ok;
-    const Kind& k = getKindManager().getOrCreateKind(&status, kindName.c_str());
+	// create a copy of kindName to ensure null-termination
+    const Kind& k = getKindManager().getOrCreateKind(&status, std::string(kindName).c_str());
     if (status != Status::Ok) {
         throwForStatus(status);
     }
     return k;
 }
 
-bool comparator(const std::reference_wrapper<const Kind>& a, const std::reference_wrapper<const Kind>& b) noexcept {
+static bool comparator(const std::reference_wrapper<const Kind>& a, const std::reference_wrapper<const Kind>& b) noexcept {
     return a.get() < b.get();
 }
 
@@ -71,7 +72,7 @@ KindManager& KVStore::getKindManager() const {
     return mgr;
 }
 
-void KVStore::put(const Kind& kind, std::string& key, std::string& value) {
+void KVStore::put(const Kind& kind, std::string_view key, std::string_view value) {
     int status = Status::Ok;
     store->put(&status, kind, key.data(), key.size(), value.data(), value.size());
     if (status != Status::Ok) {
@@ -79,7 +80,7 @@ void KVStore::put(const Kind& kind, std::string& key, std::string& value) {
     }
 }
 
-void KVStore::remove(const Kind& kind, std::string& key) {
+void KVStore::remove(const Kind& kind, std::string_view key) {
     int status = Status::Ok;
     store->remove(&status, kind, key.data(), key.size());
     if (status != Status::Ok) {
@@ -87,7 +88,7 @@ void KVStore::remove(const Kind& kind, std::string& key) {
     }
 }
 
-bytes KVStore::get(const Kind& kind, std::string& key) const {
+bytes KVStore::get(const Kind& kind, std::string_view key) const {
     int status = Status::Ok;
     size_t resultLen = 0;
     char* val = store->get(&status, kind, &resultLen, key.data(), key.size());
@@ -97,7 +98,7 @@ bytes KVStore::get(const Kind& kind, std::string& key) const {
     return bytes(val, resultLen);
 }
 
-bytes KVStore::updateIfPresent(const Kind& kind, std::string& key, std::string& value) {
+bytes KVStore::updateIfPresent(const Kind& kind, std::string_view key, std::string_view value) {
     int status = Status::Ok;
     size_t resultLen = 0;
     char* oldVal = store->updateIfPresent(&status, kind, &resultLen, key.data(), key.size(), value.data(), value.size());
@@ -107,7 +108,7 @@ bytes KVStore::updateIfPresent(const Kind& kind, std::string& key, std::string& 
     return bytes(oldVal, resultLen);
 }
 
-void KVStore::singleRemove(const Kind& kind, std::string& key) {
+void KVStore::singleRemove(const Kind& kind, std::string_view key) {
     int status = Status::Ok;
     store->singleRemove(&status, kind, key.data(), key.size());
     if (status != Status::Ok) {
@@ -115,7 +116,7 @@ void KVStore::singleRemove(const Kind& kind, std::string& key) {
     }
 }
 
-bytes KVStore::singleRemoveIfPresent(const Kind& kind, std::string& key) {
+bytes KVStore::singleRemoveIfPresent(const Kind& kind, std::string_view key) {
     int status = Status::Ok;
     size_t resultLen = 0;
     char* removed = store->singleRemoveIfPresent(&status, kind, &resultLen, key.data(), key.size());
@@ -125,7 +126,7 @@ bytes KVStore::singleRemoveIfPresent(const Kind& kind, std::string& key) {
     return bytes(removed, resultLen);
 }
 
-bytes KVStore::removeIfPresent(const Kind& kind, std::string& key) {
+bytes KVStore::removeIfPresent(const Kind& kind, std::string_view key) {
     int status = Status::Ok;
     size_t resultLen = 0;
     char* removed = store->removeIfPresent(&status, kind, &resultLen, key.data(), key.size());
@@ -135,7 +136,7 @@ bytes KVStore::removeIfPresent(const Kind& kind, std::string& key) {
     return bytes(removed, resultLen);
 }
 
-bool KVStore::putIfAbsent(const Kind& kind, std::string& key, std::string& value) {
+bool KVStore::putIfAbsent(const Kind& kind, std::string_view key, std::string_view value) {
     int status = Status::Ok;
     store->putIfAbsent(&status, kind, key.data(), key.size(), value.data(), value.size());
     if (status == Status::Ok) {

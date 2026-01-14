@@ -3,8 +3,8 @@
 #include <functional>
 #include <map>
 #include <set>
-#include <string>
-#include "client/bytes.h"
+#include <string_view>
+#include "bytes.h"
 #include "api/Kind.h"
 #include "api/Store.h"
 
@@ -17,21 +17,21 @@ public:
 
     ~KVStore();
 
-    void put(const Kind& kind, std::string& key, std::string& value);
+    void put(const Kind& kind, std::string_view key, std::string_view value);
 
-    void remove(const Kind& kind, std::string& key);
+    void remove(const Kind& kind, std::string_view key);
 
-    bytes get(const Kind& kind, std::string& key) const;
+    bytes get(const Kind& kind, std::string_view key) const;
 
-    bytes updateIfPresent(const Kind& kind, std::string& key, std::string& value);
+    bytes updateIfPresent(const Kind& kind, std::string_view key, std::string_view value);
 
-    void singleRemove(const Kind& kind, std::string& key);
+    void singleRemove(const Kind& kind, std::string_view key);
 
-    bytes singleRemoveIfPresent(const Kind& kind, std::string& key);
+    bytes singleRemoveIfPresent(const Kind& kind, std::string_view key);
 
-    bytes removeIfPresent(const Kind& kind, std::string& key);
+    bytes removeIfPresent(const Kind& kind, std::string_view key);
 
-    bool putIfAbsent(const Kind& kind, std::string& key, std::string& value);
+    bool putIfAbsent(const Kind& kind, std::string_view key, std::string_view value);
 
     bytes findMinKey(const Kind& kind) const;
 
@@ -43,7 +43,7 @@ public:
 
     const Kind& getDefaultKind() const;
 
-    const Kind& getOrCreateKind(std::string& kindName);
+    const Kind& getOrCreateKind(std::string_view kindName);
 
     const KindSet getKinds() const;
 
