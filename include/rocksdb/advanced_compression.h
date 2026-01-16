@@ -19,6 +19,7 @@ namespace ROCKSDB_NAMESPACE {
 
 // TODO: alias/adapt for compression
 struct FilterBuildingContext;
+class Decompressor;
 
 // A Compressor represents a very specific but potentially adapting strategy for
 // compressing blocks, including the relevant algorithm(s), options, dictionary,
@@ -50,6 +51,10 @@ struct FilterBuildingContext;
 // a number of built-in CompressionTypes that ignore any dictionary block in
 // the file; therefore they cannot accommodate dictionary compression in the
 // future without a schema change / extension.)
+//
+// Exceptions MUST NOT propagate out of overridden functions into RocksDB,
+// because RocksDB is not exception-safe. This could cause undefined behavior
+// including data loss, unreported corruption, deadlocks, and more.
 class Compressor {
  public:
   Compressor() = default;
@@ -85,6 +90,10 @@ class Compressor {
     return CompressionType::kDisableCompressionOption;
   }
 
+  // Return a distinct but functionally equivalent Compressor. This is often
+  // needed to implement MaybeCloneSpecialized() in wrapper compressors.
+  virtual std::unique_ptr<Compressor> Clone() const = 0;
+
   // Utility struct for providing sample data for the compression dictionary.
   // Potentially extensible by callers of Compressor (but not recommended)
   struct DictSampleArgs {
@@ -116,7 +125,7 @@ class Compressor {
   // dictionary associated with a returned compressor must be read from
   // GetSerializedDict().
   virtual std::unique_ptr<Compressor> MaybeCloneSpecialized(
-      CacheEntryRole block_type, DictSampleArgs&& dict_samples) {
+      CacheEntryRole block_type, DictSampleArgs&& dict_samples) const {
     // Default implementation: no specialization
     (void)block_type;
     (void)dict_samples;
@@ -124,6 +133,18 @@ class Compressor {
     // to provide dictionary samples
     assert(dict_samples.empty());
     return nullptr;
+  }
+
+  // A convenience function when a clone is needed and may or may not be
+  // specialized.
+  std::unique_ptr<Compressor> CloneMaybeSpecialized(
+      CacheEntryRole block_type, DictSampleArgs&& dict_samples) const {
+    auto clone = MaybeCloneSpecialized(block_type, std::move(dict_samples));
+    if (clone == nullptr) {
+      clone = Clone();
+      assert(clone != nullptr);
+    }
+    return clone;
   }
 
   // A WorkingArea is an optional structure (both for callers and
@@ -134,15 +155,15 @@ class Compressor {
   // EXTENSIBLE or reinterpret_cast-able by custom Compressor implementations
   struct WorkingArea {};
 
- protected:
   // To allow for flexible re-use / reclaimation, we have explicit Get and
   // Release functions, and usually wrap in a special RAII smart pointer.
   // For example, a WorkingArea could be saved/recycled in thread-local or
   // core-local storage, or heap managed, etc., though an explicit WorkingArea
   // is only advised for repeated compression (by a single thread).
+  // ReleaseWorkingArea() in not intended to be called directly, but used by
+  // ManagedWorkingArea.
   virtual void ReleaseWorkingArea(WorkingArea*) {}
 
- public:
   using ManagedWorkingArea =
       ManagedPtr<WorkingArea, Compressor, &Compressor::ReleaseWorkingArea>;
 
@@ -152,9 +173,11 @@ class Compressor {
     return {};
   }
 
-  // Compress `uncompressed_data` to `compressed_output`, which should be
-  // passed in empty. Note that the compressed output will be decompressed
-  // by the sequence Decompressor::ExtractUncompressedSize() followed by
+  // Compress `uncompressed_data` to buffer `compressed_output` of size
+  // `*compressed_output_size`, storing the final compressed size in
+  // `*compressed_output_size` and compression type in `*out_compression_type`.
+  // Note that the compressed output will be decompressed by the sequence
+  // Decompressor::ExtractUncompressedSize() followed by
   // Decompressor::DecompressBlock(), which must also be provided the same
   // CompressionType saved in `out_compression_type`. (In many configurations,
   // `compressed_output` will have a prefix storing the uncompressed_data size
@@ -166,27 +189,33 @@ class Compressor {
   // If return status is not OK, then some fatal condition has arisen. On OK
   // status, setting `*out_compression_type = kNoCompression` means compression
   // is declined and the caller should use the original uncompressed_data and
-  // ignore any result in `compressed_output`. Otherwise, compression has
-  // happened with results in `compressed_output` and `out_compression_type`,
-  // which are allowed to vary from call to call.
+  // ignore any result in `compressed_output`. In this case, setting
+  // *compressed_output_size to 0 suggests that compression was quickly
+  // "bypassed" and *compressed_output_size > 0 suggests that compression was
+  // attempted but rejected (e.g. insufficient compression ratio).
+  //
+  // On OK status and `*out_compression_type != kNoCompression`, compression has
+  // happened with results in `compressed_output`, `compressed_output_size`, and
+  // `out_compression_type`. The output compression type is allowed to vary from
+  // call to call but does not for compressors from BuiltinV2CompressionManager.
   //
   // The working area is optional and used to optimize repeated compression by
   // a single thread. ManagedWorkingArea is provided rather than just
   // WorkingArea so that it can be used only if the `owner` matches expectation.
   // This could be useful for a Compressor wrapping more than one alternative
   // underlying Compressor.
-  //
-  // TODO: instead of string, consider a buffer only large enough for max
-  // tolerable compressed size. Does that work for all existing algorithms?
-  // * Looks like Snappy doesn't support that. :(
-  //   * Except perhaps using the Sink interface
-  // * But looks like everything else should. :)
-  // Could save CPU by eliminating extra zero-ing and giving up quicker when
-  // ratio is insufficient.
-  virtual Status CompressBlock(Slice uncompressed_data,
-                               std::string* compressed_output,
+  virtual Status CompressBlock(Slice uncompressed_data, char* compressed_output,
+                               size_t* compressed_output_size,
                                CompressionType* out_compression_type,
                                ManagedWorkingArea* working_area) = 0;
+
+  // OPTIONAL: Return a decompressor that is optimized for output from this
+  // compressor.
+  virtual std::shared_ptr<Decompressor> GetOptimizedDecompressor() const {
+    // Default implementation: no optimization. Get a Decompressor from the
+    // CompressionManager.
+    return nullptr;
+  }
 
   // TODO: something to populate table properties based on settings, after all
   // or as WorkingAreas released. Maybe also update stats, or that could be in
@@ -221,6 +250,10 @@ class Compressor {
 // decompressed into part of a single buffer allocated to hold a block's
 // uncompressed contents along with an in-memory object representation of the
 // block (to reduce fragmentation and other overheads of separate objects).
+//
+// Exceptions MUST NOT propagate out of overridden functions into RocksDB,
+// because RocksDB is not exception-safe. This could cause undefined behavior
+// including data loss, unreported corruption, deadlocks, and more.
 class Decompressor {
  public:
   Decompressor() = default;
@@ -278,6 +311,9 @@ class Decompressor {
   // supported for this kind of Decompressor. Corruption - dictionary is
   // malformed (though many implementations will accept any data as a
   // dictionary)
+  //
+  // RocksDB promises not to call this function with an empty dictionary slice
+  // (equivalent to no dictionary).
   virtual Status MaybeCloneForDict(const Slice& /*serialized_dict*/,
                                    std::unique_ptr<Decompressor>* /*out*/) {
     return Status::NotSupported(
@@ -339,6 +375,10 @@ class Decompressor {
 //   (because that would break backward compatibility, potential quiet
 //   corruption)
 // TODO: consider adding optional streaming compression support (low priority)
+//
+// Exceptions MUST NOT propagate out of overridden functions into RocksDB,
+// because RocksDB is not exception-safe. This could cause undefined behavior
+// including data loss, unreported corruption, deadlocks, and more.
 class CompressionManager
     : public std::enable_shared_from_this<CompressionManager>,
       public Customizable {
@@ -426,14 +466,6 @@ class CompressionManager
     // Safe default implementation
     return GetDecompressor();
   }
-
-  // Get a decompressor that is allowed to have support only for the
-  // CompressionTypes used by the given Compressor.
-  virtual std::shared_ptr<Decompressor> GetDecompressorForCompressor(
-      const Compressor& compressor) {
-    // Reasonable default implementation
-    return GetDecompressorOptimizeFor(compressor.GetPreferredCompressionType());
-  }
 };
 
 // ************************* Utility wrappers etc. *********************** //
@@ -457,20 +489,40 @@ class CompressorWrapper : public Compressor {
     return wrapped_->GetPreferredCompressionType();
   }
 
+  // NOTE: Clone() not implemented here because it needs to be in the derived
+  // class
+
+  // NOTE: MaybeCloneSpecialized() is only implemented here for convenience
+  // when the wrapped Compressor uses the default implementation of
+  // MaybeCloneSpecialized(). This needs to be overridden if not.
   std::unique_ptr<Compressor> MaybeCloneSpecialized(
-      CacheEntryRole block_type, DictSampleArgs&& dict_samples) override {
-    return wrapped_->MaybeCloneSpecialized(block_type, std::move(dict_samples));
+      CacheEntryRole block_type, DictSampleArgs&& dict_samples) const override {
+    auto clone =
+        wrapped_->MaybeCloneSpecialized(block_type, std::move(dict_samples));
+    // Assert default no-op MaybeCloneSpecialized()
+    assert(clone == nullptr);
+    return clone;
   }
 
   ManagedWorkingArea ObtainWorkingArea() override {
     return wrapped_->ObtainWorkingArea();
   }
 
-  Status CompressBlock(Slice uncompressed_data, std::string* compressed_output,
+  // NOTE: Don't need to override ReleaseWorkingArea() here because
+  // ManagedWorkingArea takes care of calling it on the Compressor that created
+  // the WorkingArea.
+
+  Status CompressBlock(Slice uncompressed_data, char* compressed_output,
+                       size_t* compressed_output_size,
                        CompressionType* out_compression_type,
                        ManagedWorkingArea* working_area) override {
     return wrapped_->CompressBlock(uncompressed_data, compressed_output,
-                                   out_compression_type, working_area);
+                                   compressed_output_size, out_compression_type,
+                                   working_area);
+  }
+
+  std::shared_ptr<Decompressor> GetOptimizedDecompressor() const override {
+    return wrapped_->GetOptimizedDecompressor();
   }
 
  protected:
@@ -490,6 +542,10 @@ class DecompressorWrapper : public Decompressor {
   void ReleaseWorkingArea(WorkingArea* wa) override {
     wrapped_->ReleaseWorkingArea(wa);
   }
+
+  // NOTE: Don't need to override ReleaseWorkingArea() here because
+  // ManagedWorkingArea takes care of calling it on the Decompressor that
+  // created the WorkingArea.
 
   ManagedWorkingArea ObtainWorkingArea(CompressionType preferred) override {
     return wrapped_->ObtainWorkingArea(preferred);
@@ -569,11 +625,6 @@ class CompressionManagerWrapper : public CompressionManager {
     return wrapped_->GetDecompressorForTypes(types_begin, types_end);
   }
 
-  std::shared_ptr<Decompressor> GetDecompressorForCompressor(
-      const Compressor& compressor) override {
-    return wrapped_->GetDecompressorForCompressor(compressor);
-  }
-
  protected:
   std::shared_ptr<CompressionManager> wrapped_;
 };
@@ -589,10 +640,14 @@ const std::shared_ptr<CompressionManager>& GetBuiltinV2CompressionManager();
 // lead to unexpected schema changes for user CompressionManagers building on
 // the built-in schema, in the unlikely/rare case of a new built-in schema.
 
-// Gets CompressionManager designed for the automated compression strategy.
+// Creates CompressionManager designed for the automated compression strategy.
 // This may include deciding to compress or not.
-// In future should be able to select compression algorithm based on the CPU
-// utilization and IO constraints.
+// EXPERIMENTAL
 std::shared_ptr<CompressionManagerWrapper> CreateAutoSkipCompressionManager(
-    std::shared_ptr<CompressionManager> wrapped);
+    std::shared_ptr<CompressionManager> wrapped = nullptr);
+// Creates CompressionManager designed for the CPU and IO cost aware compression
+// strategy
+// EXPERIMENTAL
+std::shared_ptr<CompressionManagerWrapper> CreateCostAwareCompressionManager(
+    std::shared_ptr<CompressionManager> wrapped = nullptr);
 }  // namespace ROCKSDB_NAMESPACE
