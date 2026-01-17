@@ -111,6 +111,6 @@ private:
 private:
     inline static const uint64_t FLUSH_BATCH_SIZE = 16384L - 1L;
     inline static const std::chrono::milliseconds FLUSH_TIME_WINDOW_MILLIS{985L};
-    inline static const std::string DefaultCF = rocksdb::kDefaultColumnFamilyName;
+    inline static const std::string DefaultCF { "default" };
     inline static const KindImpl EmptyKind = KindImpl();
 };

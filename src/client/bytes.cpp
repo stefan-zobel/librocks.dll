@@ -51,6 +51,6 @@ void bytes::copy(const bytes& other) {
     data_ = tmp;
 }
 
-void swap(bytes& lhs, bytes& rhs) {
-    lhs.swap(rhs);
-}
+//void swap(bytes& lhs, bytes& rhs) {
+//    lhs.swap(rhs);
+//}
