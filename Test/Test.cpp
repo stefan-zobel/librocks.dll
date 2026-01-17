@@ -18,6 +18,7 @@ int main() {
             return -1;
         }
 
+        const Kind& dflt = kv.getOrCreateKind("default");
         kv.compactAll();
 
         for (auto& kind : kv.getKinds()) {

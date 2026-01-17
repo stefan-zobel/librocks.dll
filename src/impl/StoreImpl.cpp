@@ -76,7 +76,7 @@ rocksdb::Status StoreImpl::openDatabase() {
     rocksdb::Status s = rocksdb::DB::ListColumnFamilies(options, path, &families);
     if (s.ok() || s.IsPathNotFound()) {
         if (families.empty()) {
-            families.push_back(rocksdb::kDefaultColumnFamilyName);
+            families.push_back(DefaultCF);
         }
         std::vector<rocksdb::ColumnFamilyDescriptor> cfDescs;
         for (auto& cfName : families) {
