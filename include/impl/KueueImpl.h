@@ -156,6 +156,62 @@ public:
         }
     }
 
+    char* readNext(int* status, size_t* valLen, unsigned long long* pKey, std::chrono::milliseconds timeout) noexcept override {
+        int r = Status::Ok;
+        int* state = status ? status : &r;
+        if (isValid_) {
+            char key[sizeof(unsigned __int64)];
+            std::unique_lock<std::mutex> lock(takeLock);
+            // use wait_for with a predicate to handle spurious wakeups
+            if (timeout > std::chrono::milliseconds(0)) {
+                bool success = notEmpty.wait_for(lock, timeout, [this] { return count.load() > 0LL; });
+                if (!success) {
+                    *state = Status::TimedOut;
+                    return nullptr;
+                }
+            }
+            else {
+                // indefinite wait if no timeout > 0 provided
+                notEmpty.wait(lock, [this] { return count.load() > 0LL; });
+            }
+            char* value = store->get(state, getKindRef(), valLen, putU64BE(minKey, &key[0]),
+                sizeof(unsigned __int64));
+            if (*state == Status::Ok) {
+                if (pKey) {
+                    *pKey = minKey;
+                }
+            }
+            return value;
+        }
+        else {
+            *state = Status::Invalid;
+            return nullptr;
+        }
+    }
+
+    bool erase(unsigned long long key) noexcept override {
+        if (isValid_ && key == minKey) {
+            int state = Status::Ok;
+            long long c = -1LL;
+            char keyBuf[sizeof(unsigned __int64)];
+            store->singleRemove(&state, getKindRef(), putU64BE(key, &keyBuf[0]),
+                sizeof(unsigned __int64));
+            if (state == Status::Ok) {
+                ++minKey;
+                c = count.fetch_sub(1LL);
+                ++totalTakes_;
+            }
+            if (c > 1LL) {
+                // signal other waiting takers
+                notEmpty.notify_one();
+            }
+            return (state == Status::Ok);
+        }
+        else {
+            return false;
+        }
+    }
+
     void clear(int* status) noexcept override {
         int r = Status::Ok;
         int* state = status ? status : &r;
