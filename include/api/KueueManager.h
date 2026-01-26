@@ -16,5 +16,7 @@ struct LIBROCKS_API KueueManager {
 
     virtual void compactAll(int* status) noexcept = 0;
 
+    virtual void syncWal(int* status) noexcept = 0;
+
     virtual ~KueueManager() = default;
 };

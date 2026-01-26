@@ -57,6 +57,13 @@ public:
         }
     }
 
+    void syncWal(int* status) noexcept override {
+        synchronize(monitor);
+        if (validateOpen(status)) {
+            store->syncWAL();
+        }
+    }
+
     const char* getRocksDBVersion() const noexcept override {
         return version.c_str();
     }
