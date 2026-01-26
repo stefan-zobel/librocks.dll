@@ -12,6 +12,7 @@ public:
         auto impl = new StoreImpl(path);
         if (impl->isOpen()) {
             store = impl;
+            version = rocksdb::GetRocksVersionAsString();
         }
         else {
             assign(impl->getCode(), status);
@@ -49,6 +50,17 @@ public:
         close_();
     }
 
+    void compactAll(int* status) noexcept override {
+        synchronize(monitor);
+        if (validateOpen(status)) {
+            store->compactAll(status);
+        }
+    }
+
+    const char* getRocksDBVersion() const noexcept override {
+        return version.c_str();
+    }
+
 private:
     void close_() {
         if (isOpen()) {
@@ -73,5 +85,6 @@ private:
 private:
     mutable std::mutex monitor;
     StoreImpl* store;
+    std::string version;
     std::unordered_map<std::string, KueueImpl*> queues;
 };
