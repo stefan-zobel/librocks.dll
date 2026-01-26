@@ -259,6 +259,10 @@ public:
         return totalTakes_;
     }
 
+    const char* identifier() const noexcept override {
+        return queueKind ? queueKind->name() : nullptr;
+    }
+
 private:
 
     // Signals a waiting take. Called only from put.
