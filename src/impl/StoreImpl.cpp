@@ -40,6 +40,7 @@ inline void StoreImpl::deleteIfNewTx(rocksdb::Transaction* tx) const noexcept {
 }
 
 void StoreImpl::open_() {
+    options.OptimizeForSmallDb();
     options.create_if_missing = true;
     options.error_if_exists = false;
     options.keep_log_file_num = 2;
@@ -50,7 +51,9 @@ void StoreImpl::open_() {
     options.IncreaseParallelism(std::max(std::thread::hardware_concurrency(), 2u));
     options.info_log_level = rocksdb::InfoLogLevel::WARN_LEVEL;
     txnDbOptions.write_policy = rocksdb::TxnDBWritePolicy::WRITE_COMMITTED;
+    columnFamilyOptions.OptimizeForSmallDb();
     columnFamilyOptions.periodic_compaction_seconds = 1L * 24L * 60L * 60L;
+    columnFamilyOptions.optimize_filters_for_hits = true;
     columnFamilyOptions.OptimizeLevelStyleCompaction(DEFAULT_COMPACTION_MEMTABLE_MEMORY_BUDGET);
     flushOptions.wait = true;
     flushOptionsNoWait.wait = false;
@@ -89,6 +92,7 @@ rocksdb::Status StoreImpl::openDatabase() {
                 kinds[cfDescs[i].name] = KindImpl(cfDescs[i].name.c_str(), cfHandles[i]);
             }
         }
+        txnDb->EnableFileDeletions();
     }
     return s;
 }
