@@ -5,7 +5,8 @@
 #include "rocksdb/table.h"
 #include "impl/BlockBasedTableConfig.h"
 
-constexpr uint64_t DEFAULT_COMPACTION_MEMTABLE_MEMORY_BUDGET = 512L * 1024L * 1024L;
+//constexpr uint64_t DEFAULT_COMPACTION_MEMTABLE_MEMORY_BUDGET = 512L * 1024L * 1024L;
+constexpr uint64_t DEFAULT_COMPACTION_MEMTABLE_MEMORY_BUDGET = 192L * 1024L * 1024L;
 
 inline static KindImpl* toKindImpl(const Kind& k, int* status) {
     auto kind = dynamic_cast<KindImpl*>(const_cast<Kind*>(&k));
@@ -56,7 +57,7 @@ void StoreImpl::open_() {
     columnFamilyOptions.OptimizeForSmallDb();
     columnFamilyOptions.periodic_compaction_seconds = 1L * 24L * 60L * 60L;
     columnFamilyOptions.optimize_filters_for_hits = true;
-//    columnFamilyOptions.OptimizeLevelStyleCompaction(DEFAULT_COMPACTION_MEMTABLE_MEMORY_BUDGET);
+    columnFamilyOptions.OptimizeLevelStyleCompaction(DEFAULT_COMPACTION_MEMTABLE_MEMORY_BUDGET);
     columnFamilyOptions.table_factory.reset(rocksdb::NewBlockBasedTableFactory(BlockBasedTableConfig::options));
     flushOptions.wait = true;
     flushOptionsNoWait.wait = false;
