@@ -193,17 +193,20 @@ public:
         if (isValid_ && key == minKey) {
             int state = Status::Ok;
             long long c = -1LL;
-            char keyBuf[sizeof(unsigned __int64)];
-            store->singleRemove(&state, getKindRef(), putU64BE(key, &keyBuf[0]),
-                sizeof(unsigned __int64));
-            if (state == Status::Ok) {
-                ++minKey;
-                c = count.fetch_sub(1LL);
-                ++totalTakes_;
-            }
-            if (c > 1LL) {
-                // signal other waiting takers
-                notEmpty.notify_one();
+            std::lock_guard<std::mutex> take(takeLock);
+            if (key == minKey) {
+                char keyBuf[sizeof(unsigned __int64)];
+                store->singleRemove(&state, getKindRef(), putU64BE(key, &keyBuf[0]),
+                    sizeof(unsigned __int64));
+                if (state == Status::Ok) {
+                    ++minKey;
+                    c = count.fetch_sub(1LL);
+                    ++totalTakes_;
+                }
+                if (c > 1LL) {
+                    // signal other waiting takers
+                    notEmpty.notify_one();
+                }
             }
             return (state == Status::Ok);
         }
