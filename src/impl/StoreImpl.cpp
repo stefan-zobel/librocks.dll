@@ -56,7 +56,7 @@ void StoreImpl::open_() {
     columnFamilyOptions.OptimizeForSmallDb();
     columnFamilyOptions.periodic_compaction_seconds = 1L * 24L * 60L * 60L;
     columnFamilyOptions.optimize_filters_for_hits = true;
-    columnFamilyOptions.OptimizeLevelStyleCompaction(DEFAULT_COMPACTION_MEMTABLE_MEMORY_BUDGET);
+//    columnFamilyOptions.OptimizeLevelStyleCompaction(DEFAULT_COMPACTION_MEMTABLE_MEMORY_BUDGET);
     columnFamilyOptions.table_factory.reset(rocksdb::NewBlockBasedTableFactory(BlockBasedTableConfig::options));
     flushOptions.wait = true;
     flushOptionsNoWait.wait = false;
