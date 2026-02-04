@@ -46,8 +46,8 @@ void StoreImpl::open_() {
     options.create_if_missing = true;
     options.error_if_exists = false;
     options.keep_log_file_num = 2;
-    options.delete_obsolete_files_period_micros = 3600000000L;
-    options.WAL_ttl_seconds = 4L * 3600L;
+    options.delete_obsolete_files_period_micros = 3'600'000'000L;
+    options.WAL_ttl_seconds = 4L * 3'600L;
     options.WAL_size_limit_MB = 64L;
     options.recycle_log_file_num = 10;
     options.IncreaseParallelism(std::max(std::thread::hardware_concurrency(), 2u));
