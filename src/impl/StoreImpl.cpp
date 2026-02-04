@@ -2,8 +2,11 @@
 #include <thread>
 #include "impl/StoreImpl.h"
 #include "impl/SimpleLogger.h"
+#include "rocksdb/table.h"
+#include "impl/BlockBasedTableConfig.h"
 
-constexpr uint64_t DEFAULT_COMPACTION_MEMTABLE_MEMORY_BUDGET = 512L * 1024L * 1024L;
+//constexpr uint64_t DEFAULT_COMPACTION_MEMTABLE_MEMORY_BUDGET = 512L * 1024L * 1024L;
+constexpr uint64_t DEFAULT_COMPACTION_MEMTABLE_MEMORY_BUDGET = 192L * 1024L * 1024L;
 
 inline static KindImpl* toKindImpl(const Kind& k, int* status) {
     auto kind = dynamic_cast<KindImpl*>(const_cast<Kind*>(&k));
@@ -44,8 +47,8 @@ void StoreImpl::open_() {
     options.create_if_missing = true;
     options.error_if_exists = false;
     options.keep_log_file_num = 2;
-    options.delete_obsolete_files_period_micros = 3600000000L;
-    options.WAL_ttl_seconds = 4L * 3600L;
+    options.delete_obsolete_files_period_micros = 3'600'000'000L;
+    options.WAL_ttl_seconds = 4L * 3'600L;
     options.WAL_size_limit_MB = 64L;
     options.recycle_log_file_num = 10;
     options.IncreaseParallelism(std::max(std::thread::hardware_concurrency(), 2u));
@@ -55,6 +58,7 @@ void StoreImpl::open_() {
     columnFamilyOptions.periodic_compaction_seconds = 1L * 24L * 60L * 60L;
     columnFamilyOptions.optimize_filters_for_hits = true;
     columnFamilyOptions.OptimizeLevelStyleCompaction(DEFAULT_COMPACTION_MEMTABLE_MEMORY_BUDGET);
+    columnFamilyOptions.table_factory.reset(rocksdb::NewBlockBasedTableFactory(BlockBasedTableConfig::options));
     flushOptions.wait = true;
     flushOptionsNoWait.wait = false;
     rocksdb::Status s = openDatabase();

@@ -191,6 +191,7 @@
     <ClInclude Include="include\client\bytes.h" />
     <ClInclude Include="include\client\KVStore.h" />
     <ClInclude Include="include\client\RocksException.h" />
+    <ClInclude Include="include\impl\BlockBasedTableConfig.h" />
     <ClInclude Include="include\impl\KindImpl.h" />
     <ClInclude Include="include\impl\KueueImpl.h" />
     <ClInclude Include="include\impl\KueueManagerImpl.h" />
@@ -205,6 +206,7 @@
     <ClCompile Include="src\client\bytes.cpp" />
     <ClCompile Include="src\client\KVStore.cpp" />
     <ClCompile Include="src\client\RocksException.cpp" />
+    <ClCompile Include="src\impl\BlockBasedTableConfig.cpp" />
     <ClCompile Include="src\impl\KindImpl.cpp" />
     <ClCompile Include="src\impl\librocks.cpp" />
     <ClCompile Include="src\impl\SimpleLogger.cpp" />
