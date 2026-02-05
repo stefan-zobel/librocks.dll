@@ -54,7 +54,8 @@ void StoreImpl::open_() {
     options.recycle_log_file_num = 10;
     options.IncreaseParallelism(std::max(std::thread::hardware_concurrency(), 2u));
     options.info_log_level = rocksdb::InfoLogLevel::WARN_LEVEL;
-    rocksdb::Env* env = rocksdb::Env::Default();
+    rocksdb::Env* env = options.env;
+    if (!env) env = rocksdb::Env::Default();
     if (env) {
         rocksdb::SstFileManager* sstFileManager_ = rocksdb::NewSstFileManager(env);
         if (sstFileManager_) {
