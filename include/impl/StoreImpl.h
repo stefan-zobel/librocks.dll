@@ -101,6 +101,7 @@ private:
     rocksdb::FlushOptions flushOptionsNoWait;
     rocksdb::TransactionDB* txnDb;
     rocksdb::Transaction* reusableTx_;
+    rocksdb::SstFileManager* sstFileManager;
     std::unordered_map<std::string, KindImpl> kinds;
     std::string path;
     std::string version;

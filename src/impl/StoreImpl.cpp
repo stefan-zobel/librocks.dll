@@ -3,6 +3,7 @@
 #include "impl/StoreImpl.h"
 #include "impl/SimpleLogger.h"
 #include "rocksdb/table.h"
+#include "rocksdb/sst_file_manager.h"
 #include "impl/BlockBasedTableConfig.h"
 
 //constexpr uint64_t DEFAULT_COMPACTION_MEMTABLE_MEMORY_BUDGET = 512L * 1024L * 1024L;
@@ -53,6 +54,14 @@ void StoreImpl::open_() {
     options.recycle_log_file_num = 10;
     options.IncreaseParallelism(std::max(std::thread::hardware_concurrency(), 2u));
     options.info_log_level = rocksdb::InfoLogLevel::WARN_LEVEL;
+    rocksdb::Env* env = rocksdb::Env::Default();
+    if (env) {
+        rocksdb::SstFileManager* sstFileManager_ = rocksdb::NewSstFileManager(env);
+        if (sstFileManager_) {
+            options.sst_file_manager.reset(sstFileManager_);
+            sstFileManager = sstFileManager_;
+        }
+    }
     txnDbOptions.write_policy = rocksdb::TxnDBWritePolicy::WRITE_COMMITTED;
     columnFamilyOptions.OptimizeForSmallDb();
     columnFamilyOptions.periodic_compaction_seconds = 1L * 24L * 60L * 60L;
