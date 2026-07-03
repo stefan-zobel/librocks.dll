@@ -36,7 +36,7 @@ static const std::string today() {
 FILE* openLogfile() {
     FILE* f = nullptr;
     std::string path = ownPath().append("librocks").append(today()).append(".log");
-    if (fopen_s(&f, path.c_str(), "a+") == 0) {
+    if ((f = _fsopen(path.c_str(), "a", _SH_DENYNO)) != nullptr) {
         return f;
     }
     return nullptr;
